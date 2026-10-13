@@ -1,0 +1,12 @@
+parameter,value
+training_episodes,50000
+test_trajectories,10000
+learning_rate,0.1
+gamma,1.0
+training_seed,66401
+test_seed,66402
+epsilon_start,1.0
+epsilon_end,0.05
+epsilon_decay_episodes,40000
+evaluation_epsilon,0
+official_threshold,180

@@ -1,4 +1,4 @@
-"""Execute the core in a fresh project kernel; save outputs only on success."""
+"""Execute the main experiment in a fresh kernel; save outputs on success."""
 from pathlib import Path
 import hashlib
 import os
@@ -13,6 +13,8 @@ os.environ["JUPYTER_CONFIG_DIR"] = str(ROOT / ".jupyter" / "config")
 os.environ["JUPYTER_RUNTIME_DIR"] = str(ROOT / ".jupyter" / "runtime")
 os.environ["IPYTHONDIR"] = str(ROOT / ".jupyter" / "ipython")
 os.environ["JUPYTER_PATH"] = str(Path(sys.prefix) / "share" / "jupyter")
+os.environ["MPLCONFIGDIR"] = str(ROOT / ".cache" / "matplotlib")
+os.environ["XDG_CACHE_HOME"] = str(ROOT / ".cache")
 for variable in ("JUPYTER_CONFIG_DIR", "JUPYTER_RUNTIME_DIR", "IPYTHONDIR"):
     Path(os.environ[variable]).mkdir(parents=True, exist_ok=True)
 os.chdir(ROOT)
@@ -24,6 +26,9 @@ originals = [ROOT / "CS664_Project_Wong_Sheung_Wan_Proposal.md"]
 assignment_pdf = ROOT / "metcs664_TermProject.pdf"
 if assignment_pdf.exists():
     originals.append(assignment_pdf)  # Instructor material remains local, outside Git.
+practice_notebook = ROOT / "CS664_Flight_Booking_Practice.ipynb"
+if practice_notebook.exists():
+    originals.append(practice_notebook)
 before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
 notebook_path = ROOT / "CS664_Flight_Booking.ipynb"
 notebook = nbformat.read(notebook_path, as_version=4)
@@ -37,5 +42,5 @@ assert before == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path i
 nbformat.validate(notebook)
 nbformat.write(notebook, notebook_path)
 print(f"PASS: {len(code_cells)} code cells executed in a fresh kernel; no cell errors.")
-print("Original proposal and any local assignment PDF SHA-256 hashes unchanged.")
+print("Proposal, local assignment PDF, and separate practice Notebook hashes unchanged.")
 print(f"Saved executed Notebook: {notebook_path}")

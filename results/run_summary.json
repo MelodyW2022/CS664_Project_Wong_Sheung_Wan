@@ -145,7 +145,149 @@
   "execution": {
     "python": "/Users/sheungwanwong/Documents/bu.met.mssd/fall1.2026/metcs664/CS664_Project_Wong_Sheung_Wan/.venv/bin/python",
     "python_version": "3.13.11",
-    "numpy_version": "2.5.4"
+    "numpy_version": "2.5.4",
+    "scipy_version": "1.18.1",
+    "matplotlib_version": "3.11.2"
   },
+  "simulation_assumptions": {
+    "purchase_opportunities": 7,
+    "time_remaining": [
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      0
+    ],
+    "price_levels": [
+      120,
+      180,
+      240,
+      300,
+      360
+    ],
+    "initial_price": "uniform over five levels",
+    "wait_moves": [
+      60,
+      0,
+      -60
+    ],
+    "early_wait_times": [
+      6,
+      5,
+      4,
+      3
+    ],
+    "early_probabilities": [
+      0.3,
+      0.3,
+      0.4
+    ],
+    "late_wait_times": [
+      2,
+      1
+    ],
+    "late_probabilities": [
+      0.6,
+      0.2,
+      0.2
+    ],
+    "boundaries": "clip to $120\u2013$360",
+    "book_reward": "negative current price; terminate",
+    "wait_reward": 0,
+    "deadline": "BOOK mandatory at time 0",
+    "excluded_events": [
+      "refunds",
+      "cancellations",
+      "sold-out events"
+    ],
+    "data_status": "hypothetical probabilities; no measured airfare data"
+  },
+  "verification_results": [
+    {
+      "check": "simulator transitions",
+      "cases": 90,
+      "status": "PASS",
+      "detail": "all time/price/move combinations; probability regimes; both boundaries"
+    },
+    {
+      "check": "episode rules",
+      "cases": 7,
+      "status": "PASS",
+      "detail": "all purchase days; BOOK/WAIT rewards; deadline; reject post-purchase action"
+    },
+    {
+      "check": "Q-value updates",
+      "cases": 2,
+      "status": "PASS",
+      "detail": "legal next-action bootstrap; terminal reward-only target"
+    },
+    {
+      "check": "exact MDP reference",
+      "cases": 18225,
+      "status": "PASS",
+      "detail": "five full latent-path expectations match backward induction; optimal dominates all policies"
+    },
+    {
+      "check": "policy actions",
+      "cases": 5,
+      "status": "PASS",
+      "detail": "all deadline prices force BOOK; Q-table unchanged"
+    },
+    {
+      "check": "paired intervals",
+      "cases": 2,
+      "status": "PASS",
+      "detail": "zero differences; paired toy sample SD and Student-t critical value"
+    },
+    {
+      "check": "future-price isolation",
+      "cases": 400,
+      "status": "PASS",
+      "detail": "future suffix edits cannot change any observed decision; Q-table unchanged"
+    }
+  ],
+  "exact_mdp": {
+    "optimal_expected_cost": 207.27422399999995,
+    "learned_policy_expected_cost": 215.70911999999998,
+    "gap_above_optimal": 8.434896000000037
+  },
+  "paired_95ci": [
+    {
+      "baseline": "Immediate booking",
+      "trajectories": 10000,
+      "mean_paired_saving": 24.726,
+      "paired_sd": 45.30419595376461,
+      "standard_error": 0.45304195953764614,
+      "degrees_of_freedom": 9999,
+      "critical_value": 1.960201263621357,
+      "ci_95_lower": 23.83794657844081,
+      "ci_95_upper": 25.614053421559188
+    },
+    {
+      "baseline": "Minimum-price rule ($120)",
+      "trajectories": 10000,
+      "mean_paired_saving": 8.622,
+      "paired_sd": 70.46330693178099,
+      "standard_error": 0.7046330693178099,
+      "degrees_of_freedom": 9999,
+      "critical_value": 1.960201263621357,
+      "ci_95_lower": 7.240777367133834,
+      "ci_95_upper": 10.003222632866166
+    },
+    {
+      "baseline": "Fixed-threshold rule ($180)",
+      "trajectories": 10000,
+      "mean_paired_saving": 4.884,
+      "paired_sd": 43.59927331577175,
+      "standard_error": 0.43599273315771747,
+      "degrees_of_freedom": 9999,
+      "critical_value": 1.960201263621357,
+      "ci_95_lower": 4.029366493534513,
+      "ci_95_upper": 5.738633506465487
+    }
+  ],
+  "ci_method": "individual paired Student-t; conditional on trained policy",
   "personally_practiced_by_user": "Not established; user must run and explain the demo cells."
 }

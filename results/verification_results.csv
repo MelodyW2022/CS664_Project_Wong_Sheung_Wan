@@ -1,0 +1,8 @@
+check,cases,status,detail
+simulator transitions,90,PASS,all time/price/move combinations; probability regimes; both boundaries
+episode rules,7,PASS,all purchase days; BOOK/WAIT rewards; deadline; reject post-purchase action
+Q-value updates,2,PASS,legal next-action bootstrap; terminal reward-only target
+exact MDP reference,18225,PASS,five full latent-path expectations match backward induction; optimal dominates all policies
+policy actions,5,PASS,all deadline prices force BOOK; Q-table unchanged
+paired intervals,2,PASS,zero differences; paired toy sample SD and Student-t critical value
+future-price isolation,400,PASS,future suffix edits cannot change any observed decision; Q-table unchanged

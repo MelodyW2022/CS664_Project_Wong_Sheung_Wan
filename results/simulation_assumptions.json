@@ -1,0 +1,55 @@
+{
+  "purchase_opportunities": 7,
+  "time_remaining": [
+    6,
+    5,
+    4,
+    3,
+    2,
+    1,
+    0
+  ],
+  "price_levels": [
+    120,
+    180,
+    240,
+    300,
+    360
+  ],
+  "initial_price": "uniform over five levels",
+  "wait_moves": [
+    60,
+    0,
+    -60
+  ],
+  "early_wait_times": [
+    6,
+    5,
+    4,
+    3
+  ],
+  "early_probabilities": [
+    0.3,
+    0.3,
+    0.4
+  ],
+  "late_wait_times": [
+    2,
+    1
+  ],
+  "late_probabilities": [
+    0.6,
+    0.2,
+    0.2
+  ],
+  "boundaries": "clip to $120\u2013$360",
+  "book_reward": "negative current price; terminate",
+  "wait_reward": 0,
+  "deadline": "BOOK mandatory at time 0",
+  "excluded_events": [
+    "refunds",
+    "cancellations",
+    "sold-out events"
+  ],
+  "data_status": "hypothetical probabilities; no measured airfare data"
+}

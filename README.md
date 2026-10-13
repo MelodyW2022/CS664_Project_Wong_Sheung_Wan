@@ -1,10 +1,13 @@
 # Flight Booking Decision Assistant
 
-The original proposal and course PDF are preserved. The core is implemented in
+The original proposal and course PDF are preserved. The project is implemented in
 `CS664_Flight_Booking.ipynb`: the specified simulator, 50,000-episode tabular
 Q-learning training, greedy BOOK/WAIT predictions, four strategies on the same
-10,000 fresh test trajectories, a mean-cost table, and a complete decision trace.
+10,000 fresh test trajectories, exact finite-horizon MDP references, a BOOK/WAIT
+heatmap, paired 95% confidence intervals, and a complete decision trace.
 No flight data, external APIs, or website are used.
+The instructor's `metcs664_TermProject.pdf` supplies the official submission
+requirements; the proposal Markdown is the implementation plan.
 
 Git excludes environments, caches, credentials, and instructor course materials.
 The instructor PDF remains in the local project folder and is not uploaded.
@@ -37,8 +40,10 @@ does this in a fresh kernel and saves actual outputs only after a successful run
 
 ## Results and learning
 
+Start with [RESULTS.md](RESULTS.md) for actual findings and linked evidence.
 The executed Notebook contains checks, observed Q-value updates, comparison,
-trace, and interpretation. `results/` contains:
+trace, analytical references, confidence intervals, and interpretation.
+Tables are CSV and figures are PNG in `results/`:
 
 - `mean_cost_comparison.csv` and `official_comparison.md`: official means and
   mean paired savings (baseline cost minus Q-learning cost).
@@ -46,20 +51,34 @@ trace, and interpretation. `results/` contains:
 - `test_trajectories.npy`, `q_values.npy`, `training_visit_counts.npy`: raw evidence.
 - `q_learning_trace.md` and `run_summary.json`: trace, final cost, settings,
   actual updates, verification counts, and interpreter version.
+- `exact_mdp_comparison.csv`, `exact_state_values.csv`: analytical optimal and
+  fixed-policy expectations, averaged uniformly over initial prices.
+- `policy_heatmap.png`, `learned_policy_actions.csv`: greedy BOOK/WAIT decisions.
+- `paired_savings_95ci.csv`, `paired_savings_95ci.png`: mean paired savings and
+  individual 95% Student-t intervals, conditional on this trained policy.
+- `q_learning_trace.csv`, `q_learning_trace.png`: complete observed trace.
+- `simulation_assumptions.json`, `training_parameters.csv`,
+  `verification_results.csv`: model, settings, and actually executed checks.
 
 Training seed **66401** and test seed **66402** are separate. Evaluation has no
 exploration or Q updates. A policy sees only its current state and stops at
 purchase. The official threshold is **$180**. For practice, change only
 `PRACTICE_THRESHOLD` in cell **6A** and rerun that cell; the official comparison
-remains intact. The default practice execution does not count as your practice.
+remains intact. The default demonstration execution does not count as your practice.
+Guided practice is paused. `CS664_Flight_Booking_Practice.ipynb` remains separate
+and unchanged; its incomplete TODO is not part of the main Notebook execution.
 
-Section **9** identifies the essential cells to personally run and explain before
+Section **11** identifies the essential cells to personally run and explain before
 recording the approximately 10-minute demo. The agent implemented and executed
 the core; your personal practice and camera-on recording remain yours to do.
 The separate final PDF/Word proposal/writeup and recording required by the
 assignment have not been produced. Exclude `.venv/` and `.jupyter/` when packaging
-the project zip; include the Notebook, runner, requirements, README, and results.
+the project zip; include the Notebook, runner, requirements, README, RESULTS.md,
+proposal, and results. Also exclude `.tools/` and caches. Upload the project
+writeup PDF/Word file, project zip, and recording separately as the PDF requires.
 
-Confidence intervals, the exact MDP reference solution, and the policy heatmap
-are deferred. One seeded result from hypothetical probabilities does not prove
-convergence or savings on every trip, and is not real-flight advice.
+Exact MDP references use known simulator probabilities; the learning agent
+never receives them. Sampled means and paired intervals use the shared held-out
+trajectories. One seeded result from hypothetical probabilities does not prove
+convergence or savings on every trip. Intervals are large-sample approximations,
+are not simultaneous, and do not quantify variability across training seeds.

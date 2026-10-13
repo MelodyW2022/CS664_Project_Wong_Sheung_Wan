@@ -1,0 +1,6 @@
+policy,exact_expected_cost,gap_above_optimal,value_type
+Optimal MDP reference,207.27422399999995,0.0,analytical reference
+Immediate booking,240.0,32.72577600000005,analytical reference
+Minimum-price rule ($120),224.172768,16.898544000000044,analytical reference
+Fixed-threshold rule ($180),220.822656,13.548432000000048,analytical reference
+Q-learning (greedy),215.70911999999998,8.434896000000037,analytical reference
