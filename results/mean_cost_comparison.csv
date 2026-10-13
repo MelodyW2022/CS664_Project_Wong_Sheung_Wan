@@ -1,0 +1,5 @@
+strategy,trajectories,mean_purchase_cost,mean_paired_saving_vs_q
+Immediate booking,10000,239.58,24.726
+Minimum-price rule ($120),10000,223.476,8.622
+Fixed-threshold rule ($180),10000,219.738,4.884
+Q-learning (greedy),10000,214.854,0.0

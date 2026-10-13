@@ -1,0 +1,53 @@
+# Local Python environments and tools
+.venv/
+venv/
+env/
+.env/
+.tools/
+
+# Runtime files, caches, and editor/OS files
+.jupyter/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.DS_Store
+*.log
+
+# Credentials and private configuration
+.env
+.env.*
+!.env.example
+.aws/
+.ssh/
+.netrc
+.git-credentials
+credentials.json
+credentials*.json
+secrets.*
+token.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Instructor documents stay local. Allow the student's final project PDF.
+*.pdf
+!CS664_Project_Wong_Sheung_Wan*.pdf
+metcs664_TermProject.pdf
+*.ppt
+*.pptx
+*.odp
+metcs664_*
+instructor-materials/
+course-materials/
+lectures/
+lecture-notes/
+lecture_notes/
+*lecture*notes*
+*Lecture*Notes*

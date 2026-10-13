@@ -1,0 +1,151 @@
+{
+  "training_seed": 66401,
+  "test_seed": 66402,
+  "training_episodes": 50000,
+  "test_trajectories": 10000,
+  "alpha": 0.1,
+  "gamma": 1.0,
+  "epsilon_start": 1.0,
+  "epsilon_end": 0.05,
+  "epsilon_decay_episodes": 40000,
+  "evaluation_exploration": 0,
+  "official_threshold": 180,
+  "comparison": [
+    {
+      "strategy": "Immediate booking",
+      "trajectories": 10000,
+      "mean_purchase_cost": 239.58,
+      "mean_paired_saving_vs_q": 24.726
+    },
+    {
+      "strategy": "Minimum-price rule ($120)",
+      "trajectories": 10000,
+      "mean_purchase_cost": 223.476,
+      "mean_paired_saving_vs_q": 8.622
+    },
+    {
+      "strategy": "Fixed-threshold rule ($180)",
+      "trajectories": 10000,
+      "mean_purchase_cost": 219.738,
+      "mean_paired_saving_vs_q": 4.884
+    },
+    {
+      "strategy": "Q-learning (greedy)",
+      "trajectories": 10000,
+      "mean_purchase_cost": 214.854,
+      "mean_paired_saving_vs_q": 0.0
+    }
+  ],
+  "first_update": {
+    "episode": 1,
+    "state": [
+      6,
+      120
+    ],
+    "action": "BOOK",
+    "old": 0.0,
+    "reward": -120,
+    "target": -120.0,
+    "learning_rate": 0.1,
+    "updated": -12.0,
+    "terminal": true
+  },
+  "observed_wait_update": {
+    "episode": 376,
+    "state": [
+      1,
+      240
+    ],
+    "action": "WAIT",
+    "old": 0.0,
+    "reward": 0,
+    "target": -30.0,
+    "learning_rate": 0.1,
+    "updated": -3.0,
+    "terminal": false
+  },
+  "trace_index": 1,
+  "decision_trace": [
+    {
+      "day": 1,
+      "state": [
+        6,
+        360
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 2,
+      "state": [
+        5,
+        300
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 3,
+      "state": [
+        4,
+        360
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 4,
+      "state": [
+        3,
+        360
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 5,
+      "state": [
+        2,
+        360
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 6,
+      "state": [
+        1,
+        360
+      ],
+      "action": "WAIT",
+      "reward": 0
+    },
+    {
+      "day": 7,
+      "state": [
+        0,
+        360
+      ],
+      "action": "BOOK",
+      "reward": -360
+    }
+  ],
+  "final_purchase_cost": 360,
+  "verification": {
+    "exact_transition_cases": 90,
+    "purchase_days_checked": 7,
+    "legal_pairs_visited": 65,
+    "minimum_legal_pair_visits": 22,
+    "terminal_updates_reward_only": true,
+    "deadline_booking": true,
+    "post_purchase_rejected": true,
+    "q_unchanged_during_evaluation": true,
+    "future_suffix_invariance_cases": 400
+  },
+  "execution": {
+    "python": "/Users/sheungwanwong/Documents/bu.met.mssd/fall1.2026/metcs664/CS664_Project_Wong_Sheung_Wan/.venv/bin/python",
+    "python_version": "3.13.11",
+    "numpy_version": "2.5.4"
+  },
+  "personally_practiced_by_user": "Not established; user must run and explain the demo cells."
+}
