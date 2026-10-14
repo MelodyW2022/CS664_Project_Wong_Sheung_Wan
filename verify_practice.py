@@ -30,6 +30,39 @@ hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
           for p in protected}
 path = ROOT / "CS664_Flight_Booking_Practice.ipynb"
 original = nbformat.read(path, as_version=4)
+if sys.argv[1:] == ["--part5-only"]:
+    # Verify only the new interpretation material; preserve Parts 1–4 exactly.
+    untouched = deepcopy([c for c in original.cells
+                          if not c.metadata.get("stage_label", "").startswith("P5")])
+    selected = [deepcopy(c) for c in original.cells
+                if c.metadata.get("practice_role") == "setup"
+                or c.metadata.get("stage_label", "").startswith("P5")]
+    executed = nbformat.v4.new_notebook(cells=selected, metadata=deepcopy(original.metadata))
+    NotebookClient(executed, kernel_name="cs664-flight-booking", timeout=180,
+                   allow_errors=False, resources={"metadata": {"path": str(ROOT)}}).execute()
+    by_id = {c.id: c for c in executed.cells}
+    for cell in original.cells:
+        if cell.cell_type == "code" and cell.metadata.get("stage_label", "").startswith("P5"):
+            output = by_id[cell.id]
+            cell.execution_count, cell.outputs = output.execution_count, output.outputs
+            cell.metadata = output.metadata
+    assert untouched == [c for c in original.cells
+                         if not c.metadata.get("stage_label", "").startswith("P5")]
+    assert hashes == {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+                      for p in protected}
+    original.metadata["practice_progress"]["part5_verification"] = "saved-evidence model answers verified; personal completion not established"
+    nbformat.validate(original)
+    nbformat.write(original, path)
+    manifest = {"status": "PASS", "mode": "part5-only", "training_rerun": False,
+                "parts1to4_cells_unchanged": True, "official_files_unchanged": True,
+                "protected_file_sha256": hashes, "personal_completion": "not established"}
+    (ROOT / "practice_results" / "part5_preservation_verification.json").write_text(
+        json.dumps(manifest, indent=2) + "\n")
+    print("PASS: Part 5 model answers verified using saved evidence; no training executed.")
+    print("Parts 1–4 and attempts preserved; main Notebook and official result hashes unchanged.")
+    raise SystemExit(0)
+if sys.argv[1:]:
+    raise SystemExit("Usage: .venv/bin/python verify_practice.py [--part5-only]")
 executed = deepcopy(original)
 checks = [c for c in original.cells if c.metadata.get("practice_role") == "student_check"]
 todo_cells = [c for c in original.cells if c.metadata.get("practice_role") == "student_todo"]

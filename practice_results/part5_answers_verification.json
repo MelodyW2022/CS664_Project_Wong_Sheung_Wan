@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "source": "saved CSV/JSON evidence; no training rerun",
+  "budget_arithmetic": -4.256448000000006,
+  "rate_arithmetic": 10.005696,
+  "supplied_summaries_and_answers_verified": true,
+  "personal_completion": "not established",
+  "student_prompts_filled": false
+}

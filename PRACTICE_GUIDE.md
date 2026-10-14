@@ -14,7 +14,7 @@ Open `CS664_Flight_Booking_Practice.ipynb` and select
 .venv/bin/jupyter lab CS664_Flight_Booking_Practice.ipynb
 ```
 
-Run **1A**, **P0-DATA**, and **P0-FORMAT**, then begin **Part 1**. All four parts
+Run **1A**, **P0-DATA**, and **P0-FORMAT**, then begin **Part 1**. All five parts
 are prepared now; you do not need to wait for chat answers. The old P1-TODO
 and P1-CHECK cells are retained with their source and any saved outputs.
 
@@ -42,9 +42,41 @@ Interpretation answers are models to compare with your own explanation.
 4. **Part 4 — Validation (about 20 minutes):** interpret official means and
    intervals, calculate one backward step, read four heatmap states, and
    explain what verification establishes and what it does not establish.
-5. **Rehearse (10 minutes):** follow the timed checklist at the Notebook's end.
+5. **Part 5 — Supplementary interpretation (about 10–15 minutes):** use saved
+   five-seed budget and learning-rate evidence. Answer the short questions and
+   two arithmetic prompts, then compare with the separate verified model answers.
+   Essential interpretation is labeled; visit-rate and state-switch details are
+   optional. No training loops, checkpoint logging, plots, or schedules are assigned.
+6. **Rehearse (10 minutes):** follow the timed checklist at the Notebook's end.
    Use the main Notebook for the actual recorded demo. Allow additional time
    for recording, reviewing it, preparing the writeup, and confirming uploads.
+
+## Keep the three studies distinct
+
+- **Original core:** one seed (66401), 50,000 training episodes, four strategies
+  on 10,000 shared test trips. The paired 95% intervals quantify test-trip
+  uncertainty in mean savings conditional on that original policy.
+- **Part 5A:** five seeds at 50,000 and 200,000 episodes, ten independent
+  restarts. All five worsened at the larger budget in this study. Costs and
+  optimality gaps are analytical expectations; ranges describe the five seeds,
+  not confidence intervals. Counts and correctness checks do not identify causation.
+- **Part 5B:** five seeds under three learning-rate conditions, fifteen
+  instrumented runs at 200,000 episodes. Both tested alternatives improved each
+  final seed versus alpha 0.1, with checkpoint fluctuations and positive final
+  gaps. This supports sensitivity, not an optimal rate, sole cause, convergence,
+  or real-airfare performance. The original official policy is never replaced.
+
+For your video, keep about eight minutes on the core, **8:00–9:00 on the
+supplementary findings**, and the final minute on limitations. One minute is
+enough to say the larger budget worsened these five runs, the two alternative
+rates improved their final costs, and the remaining mechanism is unresolved.
+Do not narrate every seed, checkpoint, or technical diagnostic.
+
+Start the full main run near the beginning while explaining the saved core
+code; it now includes supplementary training and can take minutes. Rehearse
+its runtime beforehand, show actual completion, and reload the saved main
+Notebook after the runner finishes. Part 5 practice itself only reads saved
+evidence and does not rerun any training.
 
 ## Goal, process, and the three validation questions
 
@@ -84,6 +116,16 @@ TODOs stop clearly, and saves evidence in `practice_results/`. It preserves
 student cells and hashes the main Notebook and official files to check that
 they remain unchanged. It does not grade existing attempts or mark learning
 complete. The verification-only cells are not added to your practice Notebook.
+
+To verify only Part 5 without rerunning Parts 1–4 or training:
+
+```sh
+.venv/bin/python verify_practice.py --part5-only
+```
+
+The supplied answers are checked against saved CSV/JSON evidence. Existing
+Parts 1–4 cells, attempts, and outputs are preserved. Your interpretation blanks
+remain blank, and verification does not establish personal completion.
 
 The main implementation and results are complete. Remaining official items
 are the final PDF/Word proposal and writeup, the project ZIP with README, and
