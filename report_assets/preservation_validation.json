@@ -2,7 +2,7 @@
   "status": "PASS",
   "protected_files_unchanged": true,
   "protected_sha256": {
-    "CS664_Flight_Booking.ipynb": "bfc4a256fe493a7fbc15698bb378d21a77a455d5a4bd35b57e760f54640805ae",
+    "CS664_Flight_Booking.ipynb": "475b448b08a53fccdcf5bf2bc38b3c972e27ef2f9a031ac4e97b4caff2603fc3",
     "CS664_Flight_Booking_Practice.ipynb": "ec65c241e0a40a3abfa0436d48989c3747d2a5977c767af57ab1470bf3c5f561",
     "CS664_Project_Wong_Sheung_Wan_Proposal.md": "f01458e43d7479d5ca88d6dc4e507248ff0ff5b528c06123b90c2d45f63cc459",
     "results/supplementary_training_runs.csv": "652e5e26bc54d4f55db5a78dab50b738f7dcd730389f4aa795c4ac522c0463d0",
@@ -53,5 +53,6 @@
     "results/verification_results.csv": "e8516eb3265fc20ebe1723bf277f0bdc0b79a7825dddf424cba096f50604d7c6",
     "results/learning_dynamics_summary.json": "0f62614262d492dee4c2cbc1c343894977606bb8c0d9bc66c314f1093b330ba7"
   },
-  "training_rerun": false
+  "training_rerun": false,
+  "notebook_markdown_refresh": "Authorized readability-only update; all code cells and outputs unchanged. See notebook_markdown_validation.json."
 }

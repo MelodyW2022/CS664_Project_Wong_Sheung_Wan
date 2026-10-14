@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "markdown_cells_shortened": 28,
+  "markdown_words_before": 2372,
+  "markdown_words_after": 1444,
+  "all_80_code_cells_identical": true,
+  "saved_outputs_execution_counts_ids_metadata_unchanged": true,
+  "all_navigation_headings_preserved": true,
+  "edited_notebook_sha256": "475b448b08a53fccdcf5bf2bc38b3c972e27ef2f9a031ac4e97b4caff2603fc3",
+  "training_rerun": false,
+  "report_regenerated": false,
+  "original_notebook_json_sha256": "33787eade91e8019f7aabc98882c5ded4a05659d7d27bc53c9a50811f5e29d47",
+  "presentation_navigation_references_match": true,
+  "exact_requested_introduction": true,
+  "practice_proposal_official_results_reports_script_readme_unchanged": true,
+  "zip_refreshed_and_verified": true,
+  "preserved_code_cell_content_sha256": "e295439eab8535e970378e8b12c46556cd208544c163841a6b587004f4503c43",
+  "preexisting_work_preserved": "The Notebook already contained a newer full-run execution than Git HEAD when this task began. Its metadata and saved outputs were preserved; checks compare against task input, not the older committed run."
+}
