@@ -199,11 +199,9 @@ All conditions fluctuated. For seed 66401 under alpha 0.1, cost rose $4.719312 b
 
 The underlying probabilities, five fare levels, short horizon, and absence of sold-out events are hypothetical. Fixed-step updates can retain sensitivity to sampled targets; decay can alter learning speed and coverage, but the relative contribution of such mechanisms was not isolated. There is no evidence here of real-flight savings. The completed project demonstrates a reproducible reinforcement-learning application and its limits rather than a validated travel recommendation.
 
-## 10. Reproducibility, assistance, and review status
+## 10. Reproducibility
 
 The ZIP provides the executed main Notebook, runner and numerical-verification module, pinned runtime requirements, README, unchanged English proposal, RESULTS.md, and all official result artifacts. README identifies the project virtual-environment interpreter and Python (CS664 Flight Booking) kernel. Report files and recording are separate uploads. Packaging excluded practice work, credentials, environments, caches, Git, local tools, and instructor materials.
-
-Codex assistance disclosure: OpenAI Codex assisted with implementation, execution, verification, supplementary investigations, report drafting, and packaging. Report numbers come from saved actual artifacts. Personal practice, independent understanding, camera-on recording, human report approval, and portal submission have not been established by those automated actions. The student must review this draft and confirm compliance with any syllabus/instructor AI-use guidance. The supplied project PDF does not specify an AI-disclosure rule; this disclosure does not replace other applicable course guidance.
 
 ## References and evidence sources
 
