@@ -41,7 +41,13 @@ does this in a fresh kernel and saves actual outputs only after a successful run
 The supplementary investigation also trains ten independent models: five fixed
 seeds at 50,000 and 200,000 episodes. Allow extra execution time. The runner
 prints progress after each seed's pair and checks that the original result
-files remain unchanged. No additional packages or commands are required.
+files remain unchanged. The learning-dynamics follow-up adds fifteen
+instrumented 200,000-episode runs (three learning-rate conditions, five seeds),
+with exact evaluation every 10,000 episodes. The runner prints each completed
+run; allow additional execution time. Earlier original and supplementary result
+files are checked for unchanged hashes. No additional packages or commands
+are required. The runner never writes the practice Notebook and permits you
+to save your practice attempts while the main experiment runs.
 
 ## Official results
 
@@ -69,6 +75,11 @@ Tables are CSV and figures are PNG in `results/`:
   mean/range summaries, and analytical baseline comparisons.
 - `supplementary_seed_budget_gaps.png`, `supplementary_trained_models.npz`:
   paired budget endpoints and every supplementary Q-table/visit-count array.
+- `learning_dynamics_*.csv`, `learning_dynamics_config.json`,
+  `learning_dynamics_summary.json`: all checkpoints, tracked states, fifteen
+  final runs, paired rate comparisons, summaries, and executed checks.
+- `learning_dynamics_checkpoint_gaps.png`, `learning_dynamics_final_models.npz`:
+  all-seed learning dynamics and clearly labeled final Q/visit-count arrays.
 
 Training seed **66401** and test seed **66402** are separate. Evaluation has no
 exploration or Q updates. A policy sees only its current state and stops at

@@ -113,3 +113,57 @@ Analytical action penalties use optimal continuation; equally optimal actions ar
 Only episode budget varied. Alpha remains 0.1; epsilon decays from 1 to 0.05 over the first 40,000 episodes, then holds. [Configuration](results/supplementary_experiment_config.json) · [actual schedule checkpoints](results/supplementary_schedule_checkpoints.csv) · [summary](results/supplementary_summary.json).
 
 Observed training-seed variability differs from the original paired 95% intervals for test-trajectory variation conditional on one policy. Constant-alpha estimation variability and exploration/coverage mechanisms are hypotheses, not tested causes. The remaining gap mechanism is unresolved; no additional tuning occurred. Checks support correctness in this teaching model, not convergence, universal seed robustness, per-trip savings, or performance on real flight prices. Agent execution is not personal practice.
+
+## Learning Dynamics and Learning-Rate Comparison
+
+Exploratory follow-up to the earlier deterioration; fifteen independently initialized runs under three prespecified rates, with unchanged simulator/gamma/epsilon. No winners replace the original policy. [Configuration](results/learning_dynamics_config.json) · [executed checks](results/learning_dynamics_verification.csv).
+
+| training_seed | condition | exact_expected_cost | gap_from_optimal |
+| --- | --- | --- | --- |
+| 66401 | constant_0.1 | 219.965568 | 12.691344 |
+| 66401 | constant_0.03 | 209.959872 | 2.685648 |
+| 66401 | visit_decay | 209.670624 | 2.396400 |
+| 66411 | constant_0.1 | 221.913600 | 14.639376 |
+| 66411 | constant_0.03 | 212.737440 | 5.463216 |
+| 66411 | visit_decay | 207.930624 | 0.656400 |
+| 66421 | constant_0.1 | 221.913600 | 14.639376 |
+| 66421 | constant_0.03 | 212.284032 | 5.009808 |
+| 66421 | visit_decay | 208.882224 | 1.608000 |
+| 66431 | constant_0.1 | 219.522432 | 12.248208 |
+| 66431 | constant_0.03 | 215.709120 | 8.434896 |
+| 66431 | visit_decay | 209.670624 | 2.396400 |
+| 66441 | constant_0.1 | 221.577600 | 14.303376 |
+| 66441 | constant_0.03 | 215.933952 | 8.659728 |
+| 66441 | visit_decay | 209.670624 | 2.396400 |
+
+| training_seed | cost_alpha_0.1 | cost_alpha_0.03 | cost_visit_decay | reduction_0.1_minus_0.03 | reduction_0.1_minus_decay | alpha_0.03_improved | visit_decay_improved |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 66401 | 219.965568 | 209.959872 | 209.670624 | 10.005696 | 10.294944 | True | True |
+| 66411 | 221.913600 | 212.737440 | 207.930624 | 9.176160 | 13.982976 | True | True |
+| 66421 | 221.913600 | 212.284032 | 208.882224 | 9.629568 | 13.031376 | True | True |
+| 66431 | 219.522432 | 215.709120 | 209.670624 | 3.813312 | 9.851808 | True | True |
+| 66441 | 221.577600 | 215.933952 | 209.670624 | 5.643648 | 11.906976 | True | True |
+
+| condition | seeds | mean_exact_cost | min_exact_cost | max_exact_cost | mean_gap | range_width |
+| --- | --- | --- | --- | --- | --- | --- |
+| constant_0.1 | 5 | 220.978560 | 219.522432 | 221.913600 | 13.704336 | 2.391168 |
+| constant_0.03 | 5 | 213.324883 | 209.959872 | 215.933952 | 6.050659 | 5.974080 |
+| visit_decay | 5 | 209.164944 | 207.930624 | 209.670624 | 1.890720 | 1.740000 |
+
+| condition | improved_intervals | worsened_intervals | unchanged_intervals |
+| --- | --- | --- | --- |
+| constant_0.1 | 39 | 48 | 8 |
+| constant_0.03 | 46 | 40 | 9 |
+| visit_decay | 36 | 26 | 33 |
+
+Alpha 0.03 improved 5/5 final policies; visit decay improved 5/5, relative to alpha 0.1 for each seed. Each checkpoint cost is an analytical model expectation under the uniform initial-price distribution, not a sampled test mean. These are seed-paired comparisons, not test-trip paired confidence intervals.
+
+[All 300 checkpoints](results/learning_dynamics_checkpoints.csv) · [2100 tracked-state diagnostics](results/learning_dynamics_tracked_states.csv) · [final fifteen runs](results/learning_dynamics_final_comparison.csv) · [paired reductions](results/learning_dynamics_paired_comparisons.csv) · [across-seed summaries](results/learning_dynamics_across_seed_summary.csv) · [checkpoint plots](results/learning_dynamics_checkpoint_gaps.png).
+
+[Every checkpoint cost/action change](results/learning_dynamics_checkpoint_changes.csv) · [change summary](results/learning_dynamics_change_summary.csv) · [all final tracked states](results/learning_dynamics_final_tracked_states.csv) · [concise state summaries](results/learning_dynamics_state_summary.csv) · [labeled Q-tables and counts](results/learning_dynamics_final_models.npz) · [structured findings](results/learning_dynamics_summary.json).
+
+Instrumentation checks executed the decay examples at 0/1000/3000 previous pair updates, verified pre-update counts and one increment per update, actual Q rates, terminal/legal behavior, independent run state, and unchanged arrays/RNG/subsequent behavior during checkpoint evaluation. Alpha 0.1 reproduces all ten earlier endpoint Q-tables, visit counts, and exact costs.
+
+Tracked Q margins and action switches describe associations with checkpoint cost changes; untracked states can also change. Checkpoints do not reveal every intervening decision. Equal seeds across different-rate conditions need not produce identical training trajectories because different actions change subsequent experiences and RNG consumption.
+
+The final comparisons and fluctuations support sensitivity to these tested settings where outcomes differ, not a sole-cause explanation. The remaining gap mechanism is unresolved. Neither 0.03 nor visit decay with scale 1000 is proven optimal; no extra schedules, grid search, or tuning occurred. Fifteen finite runs do not prove convergence or necessary improvement with more training. Hypothetical transitions do not establish real-flight performance. Agent execution does not establish personal practice.

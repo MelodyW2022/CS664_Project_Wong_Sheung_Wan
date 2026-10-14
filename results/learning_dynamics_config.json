@@ -1,0 +1,60 @@
+{
+  "seeds": [
+    66401,
+    66411,
+    66421,
+    66431,
+    66441
+  ],
+  "conditions": [
+    "constant_0.1",
+    "constant_0.03",
+    "visit_decay"
+  ],
+  "episodes_per_run": 200000,
+  "instrumented_runs": 15,
+  "checkpoint_every": 10000,
+  "tracked_states": [
+    [
+      6,
+      180
+    ],
+    [
+      5,
+      180
+    ],
+    [
+      4,
+      180
+    ],
+    [
+      4,
+      240
+    ],
+    [
+      3,
+      180
+    ],
+    [
+      3,
+      240
+    ],
+    [
+      3,
+      300
+    ]
+  ],
+  "alpha_rules": {
+    "constant_0.1": "0.1",
+    "constant_0.03": "0.03",
+    "visit_decay": "0.1 / (1 + N_previous(state, action) / 1000)"
+  },
+  "decay_scale": 1000,
+  "decay_scale_status": "prespecified exploratory setting; not optimized",
+  "gamma": 1.0,
+  "initialization": "independent zero Q/visits and new RNG/environment per run",
+  "epsilon": "existing schedule: 1 at index 0; 0.05 at index 39999; then hold",
+  "evaluation": "exact greedy policy; uniform five-price initial distribution; no exploration",
+  "reuse": "earlier constant-0.1 endpoints lack required diagnostics; all fifteen runs are instrumented",
+  "interpretation": "exploratory follow-up, not independent confirmation; no further tuning"
+}

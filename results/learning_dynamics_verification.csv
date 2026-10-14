@@ -1,0 +1,6 @@
+check,status,detail
+rates/counters/terminal/legal actions,PASS,three decay examples; three two-update rate/counter fixtures; legal deadline bootstrap and selectors
+independence and checkpoint isolation,PASS,separate RNG/Q/visits/environment; read-only arrays/state; identical next transition and RNG draws
+checkpoint isolation in all recorded runs,PASS,300 array/RNG snapshots verified; 2100 tracked-state diagnostics; fifteen independent 200000-episode runs
+constant-alpha original endpoint reproduction,PASS,"ten checkpoints reproduce prior five-seed costs, Q-tables, and visit counts at 50000/200000 episodes"
+official model and parameters preserved,PASS,original Q/visits unchanged; global alpha/gamma and epsilon schedule unchanged

@@ -1,0 +1,289 @@
+{
+  "configuration": {
+    "seeds": [
+      66401,
+      66411,
+      66421,
+      66431,
+      66441
+    ],
+    "conditions": [
+      "constant_0.1",
+      "constant_0.03",
+      "visit_decay"
+    ],
+    "episodes_per_run": 200000,
+    "instrumented_runs": 15,
+    "checkpoint_every": 10000,
+    "tracked_states": [
+      [
+        6,
+        180
+      ],
+      [
+        5,
+        180
+      ],
+      [
+        4,
+        180
+      ],
+      [
+        4,
+        240
+      ],
+      [
+        3,
+        180
+      ],
+      [
+        3,
+        240
+      ],
+      [
+        3,
+        300
+      ]
+    ],
+    "alpha_rules": {
+      "constant_0.1": "0.1",
+      "constant_0.03": "0.03",
+      "visit_decay": "0.1 / (1 + N_previous(state, action) / 1000)"
+    },
+    "decay_scale": 1000,
+    "decay_scale_status": "prespecified exploratory setting; not optimized",
+    "gamma": 1.0,
+    "initialization": "independent zero Q/visits and new RNG/environment per run",
+    "epsilon": "existing schedule: 1 at index 0; 0.05 at index 39999; then hold",
+    "evaluation": "exact greedy policy; uniform five-price initial distribution; no exploration",
+    "reuse": "earlier constant-0.1 endpoints lack required diagnostics; all fifteen runs are instrumented",
+    "interpretation": "exploratory follow-up, not independent confirmation; no further tuning"
+  },
+  "verification": [
+    {
+      "check": "rates/counters/terminal/legal actions",
+      "status": "PASS",
+      "detail": "three decay examples; three two-update rate/counter fixtures; legal deadline bootstrap and selectors"
+    },
+    {
+      "check": "independence and checkpoint isolation",
+      "status": "PASS",
+      "detail": "separate RNG/Q/visits/environment; read-only arrays/state; identical next transition and RNG draws"
+    },
+    {
+      "check": "checkpoint isolation in all recorded runs",
+      "status": "PASS",
+      "detail": "300 array/RNG snapshots verified; 2100 tracked-state diagnostics; fifteen independent 200000-episode runs"
+    },
+    {
+      "check": "constant-alpha original endpoint reproduction",
+      "status": "PASS",
+      "detail": "ten checkpoints reproduce prior five-seed costs, Q-tables, and visit counts at 50000/200000 episodes"
+    },
+    {
+      "check": "official model and parameters preserved",
+      "status": "PASS",
+      "detail": "original Q/visits unchanged; global alpha/gamma and epsilon schedule unchanged"
+    }
+  ],
+  "final_runs": [
+    {
+      "training_seed": 66401,
+      "condition": "constant_0.1",
+      "exact_expected_cost": 219.965568,
+      "gap_from_optimal": 12.691344000000043
+    },
+    {
+      "training_seed": 66401,
+      "condition": "constant_0.03",
+      "exact_expected_cost": 209.959872,
+      "gap_from_optimal": 2.685648000000043
+    },
+    {
+      "training_seed": 66401,
+      "condition": "visit_decay",
+      "exact_expected_cost": 209.670624,
+      "gap_from_optimal": 2.3964000000000567
+    },
+    {
+      "training_seed": 66411,
+      "condition": "constant_0.1",
+      "exact_expected_cost": 221.9136,
+      "gap_from_optimal": 14.639376000000055
+    },
+    {
+      "training_seed": 66411,
+      "condition": "constant_0.03",
+      "exact_expected_cost": 212.73743999999996,
+      "gap_from_optimal": 5.463216000000017
+    },
+    {
+      "training_seed": 66411,
+      "condition": "visit_decay",
+      "exact_expected_cost": 207.930624,
+      "gap_from_optimal": 0.6564000000000476
+    },
+    {
+      "training_seed": 66421,
+      "condition": "constant_0.1",
+      "exact_expected_cost": 221.9136,
+      "gap_from_optimal": 14.639376000000055
+    },
+    {
+      "training_seed": 66421,
+      "condition": "constant_0.03",
+      "exact_expected_cost": 212.28403199999997,
+      "gap_from_optimal": 5.009808000000021
+    },
+    {
+      "training_seed": 66421,
+      "condition": "visit_decay",
+      "exact_expected_cost": 208.88222400000004,
+      "gap_from_optimal": 1.6080000000000894
+    },
+    {
+      "training_seed": 66431,
+      "condition": "constant_0.1",
+      "exact_expected_cost": 219.52243200000004,
+      "gap_from_optimal": 12.24820800000009
+    },
+    {
+      "training_seed": 66431,
+      "condition": "constant_0.03",
+      "exact_expected_cost": 215.70911999999998,
+      "gap_from_optimal": 8.434896000000037
+    },
+    {
+      "training_seed": 66431,
+      "condition": "visit_decay",
+      "exact_expected_cost": 209.670624,
+      "gap_from_optimal": 2.3964000000000567
+    },
+    {
+      "training_seed": 66441,
+      "condition": "constant_0.1",
+      "exact_expected_cost": 221.5776,
+      "gap_from_optimal": 14.303376000000043
+    },
+    {
+      "training_seed": 66441,
+      "condition": "constant_0.03",
+      "exact_expected_cost": 215.933952,
+      "gap_from_optimal": 8.659728000000058
+    },
+    {
+      "training_seed": 66441,
+      "condition": "visit_decay",
+      "exact_expected_cost": 209.670624,
+      "gap_from_optimal": 2.3964000000000567
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "training_seed": 66401,
+      "cost_alpha_0.1": 219.965568,
+      "cost_alpha_0.03": 209.959872,
+      "cost_visit_decay": 209.670624,
+      "reduction_0.1_minus_0.03": 10.005696,
+      "reduction_0.1_minus_decay": 10.294943999999987,
+      "alpha_0.03_improved": true,
+      "visit_decay_improved": true
+    },
+    {
+      "training_seed": 66411,
+      "cost_alpha_0.1": 221.9136,
+      "cost_alpha_0.03": 212.73743999999996,
+      "cost_visit_decay": 207.930624,
+      "reduction_0.1_minus_0.03": 9.176160000000039,
+      "reduction_0.1_minus_decay": 13.982976000000008,
+      "alpha_0.03_improved": true,
+      "visit_decay_improved": true
+    },
+    {
+      "training_seed": 66421,
+      "cost_alpha_0.1": 221.9136,
+      "cost_alpha_0.03": 212.28403199999997,
+      "cost_visit_decay": 208.88222400000004,
+      "reduction_0.1_minus_0.03": 9.629568000000035,
+      "reduction_0.1_minus_decay": 13.031375999999966,
+      "alpha_0.03_improved": true,
+      "visit_decay_improved": true
+    },
+    {
+      "training_seed": 66431,
+      "cost_alpha_0.1": 219.52243200000004,
+      "cost_alpha_0.03": 215.70911999999998,
+      "cost_visit_decay": 209.670624,
+      "reduction_0.1_minus_0.03": 3.813312000000053,
+      "reduction_0.1_minus_decay": 9.851808000000034,
+      "alpha_0.03_improved": true,
+      "visit_decay_improved": true
+    },
+    {
+      "training_seed": 66441,
+      "cost_alpha_0.1": 221.5776,
+      "cost_alpha_0.03": 215.933952,
+      "cost_visit_decay": 209.670624,
+      "reduction_0.1_minus_0.03": 5.643647999999985,
+      "reduction_0.1_minus_decay": 11.906975999999986,
+      "alpha_0.03_improved": true,
+      "visit_decay_improved": true
+    }
+  ],
+  "across_seed_summary": [
+    {
+      "condition": "constant_0.1",
+      "seeds": 5,
+      "mean_exact_cost": 220.97856000000002,
+      "min_exact_cost": 219.52243200000004,
+      "max_exact_cost": 221.9136,
+      "mean_gap": 13.704336000000069,
+      "range_width": 2.391167999999965
+    },
+    {
+      "condition": "constant_0.03",
+      "seeds": 5,
+      "mean_exact_cost": 213.3248832,
+      "min_exact_cost": 209.959872,
+      "max_exact_cost": 215.933952,
+      "mean_gap": 6.050659200000041,
+      "range_width": 5.974080000000015
+    },
+    {
+      "condition": "visit_decay",
+      "seeds": 5,
+      "mean_exact_cost": 209.16494400000002,
+      "min_exact_cost": 207.930624,
+      "max_exact_cost": 209.670624,
+      "mean_gap": 1.8907200000000728,
+      "range_width": 1.740000000000009
+    }
+  ],
+  "checkpoint_change_summary": [
+    {
+      "condition": "constant_0.1",
+      "improved_intervals": 39,
+      "worsened_intervals": 48,
+      "unchanged_intervals": 8
+    },
+    {
+      "condition": "constant_0.03",
+      "improved_intervals": 46,
+      "worsened_intervals": 40,
+      "unchanged_intervals": 9
+    },
+    {
+      "condition": "visit_decay",
+      "improved_intervals": 36,
+      "worsened_intervals": 26,
+      "unchanged_intervals": 33
+    }
+  ],
+  "alpha_0.03_improved_seeds": 5,
+  "visit_decay_improved_seeds": 5,
+  "interpretation": "exploratory sensitivity analysis, not sole-cause identification or convergence proof",
+  "remaining_gap_cause": "unresolved",
+  "official_policy_replaced": false,
+  "personal_completion": "not established by agent execution",
+  "additional_tuning": "none"
+}

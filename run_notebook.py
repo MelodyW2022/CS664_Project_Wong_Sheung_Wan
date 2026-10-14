@@ -27,17 +27,17 @@ assignment_pdf = ROOT / "metcs664_TermProject.pdf"
 if assignment_pdf.exists():
     originals.append(assignment_pdf)  # Instructor material remains local, outside Git.
 practice_notebook = ROOT / "CS664_Flight_Booking_Practice.ipynb"
-if practice_notebook.exists():
-    originals.append(practice_notebook)
+practice_before = (hashlib.sha256(practice_notebook.read_bytes()).hexdigest()
+                   if practice_notebook.exists() else None)
 before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
 original_results = [p for p in (ROOT / "results").rglob("*")
-                    if p.is_file() and not p.name.startswith("supplementary_")]
+                    if p.is_file() and not p.name.startswith("learning_dynamics_")]
 result_hashes = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in original_results}
 notebook_path = ROOT / "CS664_Flight_Booking.ipynb"
 notebook = nbformat.read(notebook_path, as_version=4)
 
 def report_training_progress(cell, cell_index, execute_reply):
-    if cell.metadata.get("stage_label", "").startswith("S3-PAIR-"):
+    if cell.metadata.get("stage_label", "").startswith(("S3-PAIR-", "L3-RUN-")):
         for output in cell.outputs:
             if output.output_type == "stream":
                 print(output.text, end="", flush=True)
@@ -54,6 +54,12 @@ assert result_hashes == {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in 
 nbformat.validate(notebook)
 nbformat.write(notebook, notebook_path)
 print(f"PASS: {len(code_cells)} code cells executed in a fresh kernel; no cell errors.")
-print("Proposal, local assignment PDF, and separate practice Notebook hashes unchanged.")
+print("Proposal and local assignment PDF hashes unchanged.")
+practice_after = (hashlib.sha256(practice_notebook.read_bytes()).hexdigest()
+                  if practice_notebook.exists() else None)
+if practice_before == practice_after:
+    print("Practice Notebook hash unchanged; this runner never writes it.")
+else:
+    print("Practice Notebook changed during execution; this runner did not write it.")
 print("All original result files, including Q-values and visits, have unchanged hashes.")
 print(f"Saved executed Notebook: {notebook_path}")

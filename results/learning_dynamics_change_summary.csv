@@ -1,0 +1,4 @@
+condition,improved_intervals,worsened_intervals,unchanged_intervals
+constant_0.1,39,48,8
+constant_0.03,46,40,9
+visit_decay,36,26,33
