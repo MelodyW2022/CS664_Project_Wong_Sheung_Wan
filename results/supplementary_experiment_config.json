@@ -1,0 +1,18 @@
+{
+  "training_seeds": [
+    66401,
+    66411,
+    66421,
+    66431,
+    66441
+  ],
+  "episode_budgets": [
+    50000,
+    200000
+  ],
+  "alpha": 0.1,
+  "gamma": 1.0,
+  "initialization": "independent zero Q-table, new RNG and environment per run",
+  "epsilon": "1.0 at index 0 to 0.05 at index 39999, then hold 0.05",
+  "evaluation": "exact greedy policy expectation; uniform five-price initial distribution; exploration 0"
+}

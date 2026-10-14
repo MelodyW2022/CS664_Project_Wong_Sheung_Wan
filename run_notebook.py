@@ -30,17 +30,30 @@ practice_notebook = ROOT / "CS664_Flight_Booking_Practice.ipynb"
 if practice_notebook.exists():
     originals.append(practice_notebook)
 before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
+original_results = [p for p in (ROOT / "results").rglob("*")
+                    if p.is_file() and not p.name.startswith("supplementary_")]
+result_hashes = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in original_results}
 notebook_path = ROOT / "CS664_Flight_Booking.ipynb"
 notebook = nbformat.read(notebook_path, as_version=4)
-client = NotebookClient(notebook, timeout=180, kernel_name="cs664-flight-booking",
+
+def report_training_progress(cell, cell_index, execute_reply):
+    if cell.metadata.get("stage_label", "").startswith("S3-PAIR-"):
+        for output in cell.outputs:
+            if output.output_type == "stream":
+                print(output.text, end="", flush=True)
+
+client = NotebookClient(notebook, timeout=300, kernel_name="cs664-flight-booking",
+                        on_cell_executed=report_training_progress,
                         allow_errors=False, resources={"metadata": {"path": str(ROOT)}})
 client.execute()
 code_cells = [cell for cell in notebook.cells if cell.cell_type == "code"]
 assert all(cell.execution_count is not None for cell in code_cells)
 assert not any(output.output_type == "error" for cell in code_cells for output in cell.outputs)
 assert before == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
+assert result_hashes == {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in original_results}
 nbformat.validate(notebook)
 nbformat.write(notebook, notebook_path)
 print(f"PASS: {len(code_cells)} code cells executed in a fresh kernel; no cell errors.")
 print("Proposal, local assignment PDF, and separate practice Notebook hashes unchanged.")
+print("All original result files, including Q-values and visits, have unchanged hashes.")
 print(f"Saved executed Notebook: {notebook_path}")

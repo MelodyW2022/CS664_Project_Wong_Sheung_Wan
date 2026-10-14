@@ -1,0 +1,191 @@
+{
+  "config": {
+    "training_seeds": [
+      66401,
+      66411,
+      66421,
+      66431,
+      66441
+    ],
+    "episode_budgets": [
+      50000,
+      200000
+    ],
+    "alpha": 0.1,
+    "gamma": 1.0,
+    "initialization": "independent zero Q-table, new RNG and environment per run",
+    "epsilon": "1.0 at index 0 to 0.05 at index 39999, then hold 0.05",
+    "evaluation": "exact greedy policy expectation; uniform five-price initial distribution; exploration 0"
+  },
+  "verification": [
+    {
+      "check": "Q formula, terminal target, legal bootstrap",
+      "cases": 3,
+      "status": "PASS",
+      "detail": "nonzero old values; terminal no bootstrap; illegal deadline WAIT ignored"
+    },
+    {
+      "check": "deadline selectors",
+      "cases": 20,
+      "status": "PASS",
+      "detail": "greedy and epsilon-greedy always BOOK at five deadline prices"
+    },
+    {
+      "check": "all-state rewards and termination",
+      "cases": 71,
+      "status": "PASS",
+      "detail": "70 state/action requests plus invalid action; deadline WAIT forced to BOOK"
+    },
+    {
+      "check": "ties and action penalties",
+      "cases": 37,
+      "status": "PASS",
+      "detail": "35 states plus two tie/legal-action fixtures; reach-weighted penalties equal original optimality gap"
+    },
+    {
+      "check": "bounded training and frozen evaluation",
+      "cases": 10,
+      "status": "PASS",
+      "detail": "independent restarts; no deadline WAIT updates; greedy exact evaluation; original seed reproduces original Q and visits"
+    },
+    {
+      "check": "unchanged schedule and original model",
+      "cases": 5,
+      "status": "PASS",
+      "detail": "recorded epsilon checkpoints; alpha/gamma unchanged; original Q/visit counts intact"
+    }
+  ],
+  "original_strictly_suboptimal_states": 7,
+  "lower_quartile_visit_cutoff": 326.0,
+  "suboptimal_states_flagged_low_coverage": 0,
+  "training_runs": [
+    {
+      "training_seed": 66401,
+      "episodes": 50000,
+      "exact_expected_cost": 215.70911999999998,
+      "gap_from_optimal": 8.434896000000037
+    },
+    {
+      "training_seed": 66401,
+      "episodes": 200000,
+      "exact_expected_cost": 219.965568,
+      "gap_from_optimal": 12.691344000000043
+    },
+    {
+      "training_seed": 66411,
+      "episodes": 50000,
+      "exact_expected_cost": 219.965568,
+      "gap_from_optimal": 12.691344000000043
+    },
+    {
+      "training_seed": 66411,
+      "episodes": 200000,
+      "exact_expected_cost": 221.9136,
+      "gap_from_optimal": 14.639376000000055
+    },
+    {
+      "training_seed": 66421,
+      "episodes": 50000,
+      "exact_expected_cost": 217.26681599999998,
+      "gap_from_optimal": 9.99259200000003
+    },
+    {
+      "training_seed": 66421,
+      "episodes": 200000,
+      "exact_expected_cost": 221.9136,
+      "gap_from_optimal": 14.639376000000055
+    },
+    {
+      "training_seed": 66431,
+      "episodes": 50000,
+      "exact_expected_cost": 215.453952,
+      "gap_from_optimal": 8.17972800000004
+    },
+    {
+      "training_seed": 66431,
+      "episodes": 200000,
+      "exact_expected_cost": 219.52243200000004,
+      "gap_from_optimal": 12.24820800000009
+    },
+    {
+      "training_seed": 66441,
+      "episodes": 50000,
+      "exact_expected_cost": 215.933952,
+      "gap_from_optimal": 8.659728000000058
+    },
+    {
+      "training_seed": 66441,
+      "episodes": 200000,
+      "exact_expected_cost": 221.5776,
+      "gap_from_optimal": 14.303376000000043
+    }
+  ],
+  "paired_gap_changes": [
+    {
+      "training_seed": 66401,
+      "gap_50000": 8.434896000000037,
+      "gap_200000": 12.691344000000043,
+      "gap_reduction_50000_minus_200000": -4.256448000000006,
+      "improved": false
+    },
+    {
+      "training_seed": 66411,
+      "gap_50000": 12.691344000000043,
+      "gap_200000": 14.639376000000055,
+      "gap_reduction_50000_minus_200000": -1.948032000000012,
+      "improved": false
+    },
+    {
+      "training_seed": 66421,
+      "gap_50000": 9.99259200000003,
+      "gap_200000": 14.639376000000055,
+      "gap_reduction_50000_minus_200000": -4.646784000000025,
+      "improved": false
+    },
+    {
+      "training_seed": 66431,
+      "gap_50000": 8.17972800000004,
+      "gap_200000": 12.24820800000009,
+      "gap_reduction_50000_minus_200000": -4.068480000000051,
+      "improved": false
+    },
+    {
+      "training_seed": 66441,
+      "gap_50000": 8.659728000000058,
+      "gap_200000": 14.303376000000043,
+      "gap_reduction_50000_minus_200000": -5.643647999999985,
+      "improved": false
+    }
+  ],
+  "budget_summaries": [
+    {
+      "episodes": 50000,
+      "seeds": 5,
+      "mean_exact_cost": 216.86588159999997,
+      "min_exact_cost": 215.453952,
+      "max_exact_cost": 219.965568,
+      "mean_gap": 9.591657600000042,
+      "min_gap": 8.17972800000004,
+      "max_gap": 12.691344000000043
+    },
+    {
+      "episodes": 200000,
+      "seeds": 5,
+      "mean_exact_cost": 220.97856000000002,
+      "min_exact_cost": 219.52243200000004,
+      "max_exact_cost": 221.9136,
+      "mean_gap": 13.704336000000058,
+      "min_gap": 12.24820800000009,
+      "max_gap": 14.639376000000055
+    }
+  ],
+  "baselines": {
+    "Immediate booking": 240.0,
+    "Minimum-price rule ($120)": 224.172768,
+    "Fixed-threshold rule ($180)": 220.822656
+  },
+  "improved_seeds": [],
+  "corrections": "None: executed implementation checks passed",
+  "remaining_gap_cause": "Unresolved; no learning-rate/exploration tuning conducted",
+  "personal_practice": "Not established by agent execution"
+}

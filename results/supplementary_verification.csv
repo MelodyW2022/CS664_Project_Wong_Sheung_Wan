@@ -1,0 +1,7 @@
+check,cases,status,detail
+"Q formula, terminal target, legal bootstrap",3,PASS,nonzero old values; terminal no bootstrap; illegal deadline WAIT ignored
+deadline selectors,20,PASS,greedy and epsilon-greedy always BOOK at five deadline prices
+all-state rewards and termination,71,PASS,70 state/action requests plus invalid action; deadline WAIT forced to BOOK
+ties and action penalties,37,PASS,35 states plus two tie/legal-action fixtures; reach-weighted penalties equal original optimality gap
+bounded training and frozen evaluation,10,PASS,independent restarts; no deadline WAIT updates; greedy exact evaluation; original seed reproduces original Q and visits
+unchanged schedule and original model,5,PASS,recorded epsilon checkpoints; alpha/gamma unchanged; original Q/visit counts intact

@@ -60,3 +60,56 @@ Fixed-rate finite training does not guarantee convergence. Average savings do no
 Practice is paused and the separate practice Notebook is unchanged. Agent execution is not personal practice.
 Still required: final PDF/Word proposal/writeup, project zip with README, and an approximately
 10-minute camera-on presentation with code explanation and a full demo, per the instructor PDF.
+
+## Supplementary Validation and Optimality Investigation
+
+Implementation checks passed with no correction required. Original model: 7 strictly suboptimal states; 0 have a legal action at/below the 326-visit lower quartile. This association does not establish causation.
+
+Analytical action penalties use optimal continuation; equally optimal actions are accepted. [Coverage CSV](results/supplementary_original_coverage.csv) · [strictly suboptimal states](results/supplementary_suboptimal_states.csv) · [executed checks](results/supplementary_verification.csv).
+
+| training_seed | episodes | exact_expected_cost | gap_from_optimal |
+| --- | --- | --- | --- |
+| 66401 | 50000 | 215.709120 | 8.434896 |
+| 66401 | 200000 | 219.965568 | 12.691344 |
+| 66411 | 50000 | 219.965568 | 12.691344 |
+| 66411 | 200000 | 221.913600 | 14.639376 |
+| 66421 | 50000 | 217.266816 | 9.992592 |
+| 66421 | 200000 | 221.913600 | 14.639376 |
+| 66431 | 50000 | 215.453952 | 8.179728 |
+| 66431 | 200000 | 219.522432 | 12.248208 |
+| 66441 | 50000 | 215.933952 | 8.659728 |
+| 66441 | 200000 | 221.577600 | 14.303376 |
+
+| training_seed | gap_50000 | gap_200000 | gap_reduction_50000_minus_200000 | improved |
+| --- | --- | --- | --- | --- |
+| 66401 | 8.434896 | 12.691344 | -4.256448 | False |
+| 66411 | 12.691344 | 14.639376 | -1.948032 | False |
+| 66421 | 9.992592 | 14.639376 | -4.646784 | False |
+| 66431 | 8.179728 | 12.248208 | -4.068480 | False |
+| 66441 | 8.659728 | 14.303376 | -5.643648 | False |
+
+| episodes | seeds | mean_exact_cost | min_exact_cost | max_exact_cost | mean_gap | min_gap | max_gap |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 50000 | 5 | 216.865882 | 215.453952 | 219.965568 | 9.591658 | 8.179728 | 12.691344 |
+| 200000 | 5 | 220.978560 | 219.522432 | 221.913600 | 13.704336 | 12.248208 | 14.639376 |
+
+| training_seed | episodes | Immediate booking | Minimum-price rule ($120) | Fixed-threshold rule ($180) |
+| --- | --- | --- | --- | --- |
+| 66401 | 50000 | True | True | True |
+| 66401 | 200000 | True | True | True |
+| 66411 | 50000 | True | True | True |
+| 66411 | 200000 | True | True | False |
+| 66421 | 50000 | True | True | True |
+| 66421 | 200000 | True | True | False |
+| 66431 | 50000 | True | True | True |
+| 66431 | 200000 | True | True | True |
+| 66441 | 50000 | True | True | True |
+| 66441 | 200000 | True | True | False |
+
+[All ten runs](results/supplementary_training_runs.csv) · [paired gap changes](results/supplementary_paired_gap_changes.csv) · [mean/range summary](results/supplementary_budget_summary.csv) · [all baseline comparisons](results/supplementary_baseline_comparisons.csv) · [endpoint figure](results/supplementary_seed_budget_gaps.png) · [saved Q-tables/visits](results/supplementary_trained_models.npz).
+
+0/5 seeds improved at 200,000 episodes. All results are saved; the original policy is not replaced. These are exact finite-horizon expected costs under the uniform initial distribution, distinct from sampled test means. Two budgets do not establish continuous improvement.
+
+Only episode budget varied. Alpha remains 0.1; epsilon decays from 1 to 0.05 over the first 40,000 episodes, then holds. [Configuration](results/supplementary_experiment_config.json) · [actual schedule checkpoints](results/supplementary_schedule_checkpoints.csv) · [summary](results/supplementary_summary.json).
+
+Observed training-seed variability differs from the original paired 95% intervals for test-trajectory variation conditional on one policy. Constant-alpha estimation variability and exploration/coverage mechanisms are hypotheses, not tested causes. The remaining gap mechanism is unresolved; no additional tuning occurred. Checks support correctness in this teaching model, not convergence, universal seed robustness, per-trip savings, or performance on real flight prices. Agent execution is not personal practice.

@@ -38,6 +38,11 @@ the project virtual environment under Select Kernel / Python Environments.
 Use **Restart Kernel and Run All Cells**, then save the Notebook. The runner
 does this in a fresh kernel and saves actual outputs only after a successful run.
 
+The supplementary investigation also trains ten independent models: five fixed
+seeds at 50,000 and 200,000 episodes. Allow extra execution time. The runner
+prints progress after each seed's pair and checks that the original result
+files remain unchanged. No additional packages or commands are required.
+
 ## Official results
 
 Start with [RESULTS.md](RESULTS.md) for actual findings and linked evidence.
@@ -59,6 +64,11 @@ Tables are CSV and figures are PNG in `results/`:
 - `q_learning_trace.csv`, `q_learning_trace.png`: complete observed trace.
 - `simulation_assumptions.json`, `training_parameters.csv`,
   `verification_results.csv`: model, settings, and actually executed checks.
+- `supplementary_*.csv`, `supplementary_summary.json`: implementation checks,
+  original coverage/action penalties, all ten training runs, paired changes,
+  mean/range summaries, and analytical baseline comparisons.
+- `supplementary_seed_budget_gaps.png`, `supplementary_trained_models.npz`:
+  paired budget endpoints and every supplementary Q-table/visit-count array.
 
 Training seed **66401** and test seed **66402** are separate. Evaluation has no
 exploration or Q updates. A policy sees only its current state and stops at
