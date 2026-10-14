@@ -38,7 +38,7 @@ the project virtual environment under Select Kernel / Python Environments.
 Use **Restart Kernel and Run All Cells**, then save the Notebook. The runner
 does this in a fresh kernel and saves actual outputs only after a successful run.
 
-## Results and learning
+## Official results
 
 Start with [RESULTS.md](RESULTS.md) for actual findings and linked evidence.
 The executed Notebook contains checks, observed Q-value updates, comparison,
@@ -62,20 +62,19 @@ Tables are CSV and figures are PNG in `results/`:
 
 Training seed **66401** and test seed **66402** are separate. Evaluation has no
 exploration or Q updates. A policy sees only its current state and stops at
-purchase. The official threshold is **$180**. For practice, change only
-`PRACTICE_THRESHOLD` in cell **6A** and rerun that cell; the official comparison
-remains intact. The default demonstration execution does not count as your practice.
-Guided practice is paused. `CS664_Flight_Booking_Practice.ipynb` remains separate
-and unchanged; its incomplete TODO is not part of the main Notebook execution.
+purchase. The official fixed threshold is **$180**.
 
-Section **11** identifies the essential cells to personally run and explain before
-recording the approximately 10-minute demo. The agent implemented and executed
-the core; your personal practice and camera-on recording remain yours to do.
-The separate final PDF/Word proposal/writeup and recording required by the
-assignment have not been produced. Exclude `.venv/` and `.jupyter/` when packaging
-the project zip; include the Notebook, runner, requirements, README, RESULTS.md,
-proposal, and results. Also exclude `.tools/` and caches. Upload the project
-writeup PDF/Word file, project zip, and recording separately as the PDF requires.
+## Submission files
+
+Include the main Notebook with saved outputs, main runner, requirements, README,
+RESULTS.md, proposal, and official `results/` in the project ZIP. Exclude
+`CS664_Flight_Booking_Practice.ipynb`, `PRACTICE_GUIDE.md`, `practice_results/`,
+and `verify_practice.py`; these are preparation materials. Also exclude `.venv/`,
+`.jupyter/`, `.git/`, `.tools/`, caches, credentials, and instructor materials.
+No submission ZIP has been created. Upload the final writeup PDF/Word file,
+project ZIP, and recording separately as the instructor PDF requires.
+
+Practice instructions and learning order are in [PRACTICE_GUIDE.md](PRACTICE_GUIDE.md).
 
 Exact MDP references use known simulator probabilities; the learning agent
 never receives them. Sampled means and paired intervals use the shared held-out

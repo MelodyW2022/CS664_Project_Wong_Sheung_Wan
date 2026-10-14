@@ -1,0 +1,15 @@
+{
+  "source": "execution of supplied solutions and evidence displays; not student completion",
+  "personal_completion": "not established; user must attempt and explain exercises",
+  "official_results_modified": false,
+  "solution_checks_run": [
+    "P1: upper boundary and supplied BOOK/WAIT traces",
+    "P3: actual teaching costs, pairing, future isolation, frozen Q",
+    "P4: backward step, four heatmap states, exact gap, saved checks, interval signs",
+    "Provided exercise check verified with separate solution: P1-CHECK",
+    "Provided exercise check verified with separate solution: P2-CHECK \u2014 check your two update functions",
+    "Provided exercise check verified with separate solution: P2-EPS-CHECK \u2014 training, evaluation, and deadline cases",
+    "Provided exercise check verified with separate solution: P3-CHECK \u2014 the actual teaching sample",
+    "Provided exercise check verified with separate solution: P4-MDP-CHECK \u2014 deadline boundary and cost comparison"
+  ]
+}

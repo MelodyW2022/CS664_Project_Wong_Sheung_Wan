@@ -1,0 +1,13 @@
+trajectory,strategy,observed decisions,purchase_cost
+0,Immediate booking,"(6, 180):BOOK",180
+0,Minimum-price rule ($120),"(6, 180):WAIT; (5, 180):WAIT; (4, 240):WAIT; (3, 240):WAIT; (2, 180):WAIT; (1, 120):BOOK",120
+0,Fixed-threshold rule ($180),"(6, 180):BOOK",180
+0,Q-learning (greedy),"(6, 180):BOOK",180
+1,Immediate booking,"(6, 360):BOOK",360
+1,Minimum-price rule ($120),"(6, 360):WAIT; (5, 300):WAIT; (4, 360):WAIT; (3, 360):WAIT; (2, 360):WAIT; (1, 360):WAIT; (0, 360):BOOK",360
+1,Fixed-threshold rule ($180),"(6, 360):WAIT; (5, 300):WAIT; (4, 360):WAIT; (3, 360):WAIT; (2, 360):WAIT; (1, 360):WAIT; (0, 360):BOOK",360
+1,Q-learning (greedy),"(6, 360):WAIT; (5, 300):WAIT; (4, 360):WAIT; (3, 360):WAIT; (2, 360):WAIT; (1, 360):WAIT; (0, 360):BOOK",360
+4,Immediate booking,"(6, 300):BOOK",300
+4,Minimum-price rule ($120),"(6, 300):WAIT; (5, 240):WAIT; (4, 240):WAIT; (3, 240):WAIT; (2, 240):WAIT; (1, 180):WAIT; (0, 240):BOOK",240
+4,Fixed-threshold rule ($180),"(6, 300):WAIT; (5, 240):WAIT; (4, 240):WAIT; (3, 240):WAIT; (2, 240):WAIT; (1, 180):BOOK",180
+4,Q-learning (greedy),"(6, 300):WAIT; (5, 240):WAIT; (4, 240):BOOK",240

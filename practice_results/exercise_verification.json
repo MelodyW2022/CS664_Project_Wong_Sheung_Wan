@@ -1,0 +1,14 @@
+{
+  "exercise_check_cells_verified": 5,
+  "unfinished_functions_verified": [
+    "PracticeBookingEnv",
+    "terminal_update_practice",
+    "wait_update_practice",
+    "training_action_practice",
+    "paired_saving_practice",
+    "mean_saving_practice",
+    "final_step_practice"
+  ],
+  "student_answers_filled_by_verifier": false,
+  "personal_completion": "not established"
+}
