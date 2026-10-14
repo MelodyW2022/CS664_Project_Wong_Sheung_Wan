@@ -1,82 +1,18 @@
-# CS664 presentation script and screen-sharing plan
+# CS664 presentation script
 
-Use the main `CS664_Flight_Booking.ipynb` as the shared screen. Keep your camera
-on throughout. Screen directions below are not spoken narration. Do not display
-the practice Notebook or read the report page by page.
+## 0:00–0:40 — Opening and start the full run
 
-This script uses saved, verified evidence from the instructor PDF, report draft,
-main Notebook, README, and `results/`. It does not establish that you personally
-completed practice. Say only what you can explain. Codex assistance is disclosed
-in the report and in the closing narration.
+Screen:
 
-## Full-run plan before recording
-
-The timestamps are recording targets, not measured speaking times. Rehearse
-navigation and speech with a stopwatch. Use short pauses to point at code.
-
-The saved Notebook's first-cell-busy to last-cell-idle interval is 182.36 seconds,
-about three minutes. Kernel startup and runner postchecks are excluded. Complete
-CLI wall time was not measured. This plan does not promise a runtime.
-
-Start the unchanged full runner by 0:20. Explain code while it runs. Aim to
-confirm completion at 4:20, leaving roughly four minutes for execution including
-startup. The 4:20–4:50 slot is a completion/reload buffer. Relative to the recorded
-cell interval, a start at 0:20 leaves about 88 seconds for overhead or variation
-before 4:50. This is an allocated buffer, not a measured overhead estimate.
-
-Keep a terminal panel beside or below the main Notebook. From the project root:
+Show `# Flight Booking Decision Assistant — completed experiment`. From the project root, launch the full run by 0:20:
 
 ```sh
 time .venv/bin/python run_notebook.py
 ```
 
-`time` measures this new command's elapsed time. Report that value only after it
-actually finishes. The portable runner uses a fresh kernel, executes all cells,
-checks earlier numerical evidence, and saves the Notebook only after success.
-It runs the original experiment, both supplementary investigations, and the
-existing optional threshold cell. No budgets or cells are reduced or skipped.
+Then show `# 1A — imports and official settings`.
 
-During execution, the open Notebook displays earlier saved outputs. Say so.
-Read code without editing or executing cells in that viewer. Turn off editor
-Auto Save and keep the Notebook free of unsaved edits before starting. Do not
-save the stale viewer over the runner's new file.
-
-On success, the terminal must show:
-
-```text
-PASS: 80 code cells executed in a fresh kernel; no cell errors.
-Original numerical evidence, including Q-values and visits, is unchanged.
-Saved executed Notebook: .../CS664_Flight_Booking.ipynb
-```
-
-Wait for the command prompt to return with no traceback. Close and reopen the
-main Notebook from disk, or accept the editor's Reload from Disk option. Do not
-choose to overwrite its new contents. Show the freshly reloaded outputs.
-Check that the fresh displayed values match the verified numbers below before
-reading them aloud. If they differ, explain the discrepancy and investigate;
-do not attribute the earlier numbers to different new outputs.
-
-If the runner has not finished by 4:50, the planned fresh-results segment cannot
-start on time. Do not call a running or failed job a completed full demo. Keep
-recording until completion and explain the delay; an overrun may conflict with
-the approximately ten-minute requirement. Alternatively, end that recording,
-resolve any setup issue, and record a new complete take with an early full run.
-If repeated full runs cannot fit alongside the explanations, ask the instructor
-how to accommodate the conflict. Do not assume editing, speed-up, omitted runs,
-or time compression is permitted. No rehearsal or new full run was performed
-as part of preparing this script.
-
-## 0:00–0:40 — Opening, goal, and start the full run
-
-Screen instructions:
-
-- Show `# Flight Booking Decision Assistant — completed experiment`.
-- Within the first 20 seconds, open the terminal panel and launch the command
-  above. Show it starting, then return to the main Notebook.
-- Navigate to `## 1. Setup and fixed experiment settings` and
-  `# 1A — imports and official settings`.
-
-Spoken narration:
+Say:
 
 **This project uses Q-learning to study when to book a simulated flight at a lower expected cost.**
 
@@ -88,18 +24,11 @@ real flight data.
 
 ## 0:40–1:55 — Environment and simulation rules
 
-Screen instructions:
+Screen:
 
-- Show `## 2. Price simulator`.
-- Display `# 2A — one price transition`: point at `probabilities`, `rng.choice`,
-  and `np.clip`.
-- Display `# 2B — episode and terminal rules`: point at `step`, `effective_action`,
-  `self.done`, and the two return statements.
-- Briefly show the assertions in
-  `# 2D — rewards, deadline, and termination checks`. Earlier outputs are still
-  earlier evidence until the runner completes.
+Show `## 2. Price simulator`, then `# 2A — one price transition` and `# 2B — episode and terminal rules`. Point to probabilities, clipping, rewards, and the deadline/termination branches.
 
-Spoken narration:
+Say:
 
 **The environment makes every episode end with one purchase, within the allowed price range.**
 
@@ -121,17 +50,11 @@ an error. These checks test rewards, the deadline, and termination.
 
 ## 1:55–3:20 — Q-learning code, updates, and exploration
 
-Screen instructions:
+Screen:
 
-- Show `## 3. Tabular Q-learning` and
-  `# 3B — one real Q-value update`. Point at the `if done` branch and the update.
-- Show `# 3D — display actual updates and BOOK/WAIT predictions`. Identify this
-  as the earlier logged example unless the viewer has already been reloaded.
-- Show `# 3A — indexing, exploration, and greedy prediction`: point at
-  `epsilon_for`, `choose_training_action`, and the deadline branch.
-- Briefly show `# 3C — training loop`: point at the update call and `if done: ... break`.
+Show `# 3B — one real Q-value update` and `# 3D — display actual updates and BOOK/WAIT predictions`. Point to terminal versus WAIT targets. Then show `# 3A — indexing, exploration, and greedy prediction` and the update/break in `# 3C — training loop`.
 
-Spoken narration:
+Say:
 
 **Q-learning improves an action estimate by moving its old value toward a target.**
 
@@ -153,18 +76,11 @@ Testing uses only greedy actions, with no exploration or updates.
 
 ## 3:20–4:20 — Fair comparison and validation questions
 
-Screen instructions:
+Screen:
 
-- Show `## 4. Fair evaluation on 10,000 fresh trajectories`.
-- Display `# 4A — generate independent shared test trajectories` and
-  `# 4B — state-only policies`.
-- Display `# 4C — stop-on-purchase evaluator`. Point at `policy(state)` and the
-  immediate return on BOOK. The evaluator stores the path; the policy receives
-  only the current state.
-- Display `# 4E — official comparison and paired cost differences`, pointing
-  at the unchanged-Q assertion. Do not yet label its visible table fresh.
+Show `## 4. Fair evaluation on 10,000 fresh trajectories`, `# 4B — state-only policies`, and `# 4C — stop-on-purchase evaluator`. Point to `policy(state)` and the return on BOOK.
 
-Spoken narration:
+Say:
 
 **A fair comparison gives every strategy the same test paths and no future-price information.**
 
@@ -182,16 +98,11 @@ follow the rules?
 
 ## 4:20–4:50 — Confirm full execution and reload
 
-Screen instructions:
+Screen:
 
-- Show terminal progress. Require the final `PASS: 80 code cells...` line,
-  the saved-path line, and returned prompt before declaring success.
-- Close and reopen the main Notebook from disk without saving its old contents.
-- Navigate to `# 4E — official comparison and paired cost differences`.
-- This slot allows waiting and navigation. If completion is late, follow the
-  timing-conflict instructions above rather than using the success narration.
+Show the terminal. Require `PASS: 80 code cells executed in a fresh kernel; no cell errors.`, the saved-Notebook message, and a returned prompt. Reload the main Notebook from disk before showing fresh results. Say the following only after success.
 
-Spoken narration, only after actual success:
+Say:
 
 **The fresh full run has completed, and these reloaded outputs come from that run.**
 
@@ -201,16 +112,11 @@ I have reopened the saved Notebook.
 
 ## 4:50–5:40 — Cost results and one complete trace
 
-Screen instructions:
+Screen:
 
-- Show the fresh output of
-  `# 4E — official comparison and paired cost differences`.
-- Then show `## 5. One complete Q-learning decision trace` and the whole table
-  from `# 5A — actual states, actions, and final cost`.
-- Leave all seven trace rows visible. Read the final purchase rather than
-  narrating every row.
+Show the fresh table in `# 4E — official comparison and paired cost differences`. Then display all rows of `# 5A — actual states, actions, and final cost`.
 
-Spoken narration:
+Say:
 
 **The original learned policy had the lowest sampled mean cost among the four strategies.**
 
@@ -225,14 +131,11 @@ It also shows why average savings do not mean savings on every trip.
 
 ## 5:40–6:30 — Reliability and paired confidence intervals
 
-Screen instructions:
+Screen:
 
-- Show `## 8. Paired 95% confidence intervals` and the fresh table in
-  `# 8B — save all three paired savings intervals`.
-- Point to the $180 baseline row. Optionally show the figure from
-  `# 8C — save the paired confidence-interval figure` if navigation is quick.
+Show `# 8B — save all three paired savings intervals`. Point to the $180 baseline row and its interval.
 
-Spoken narration:
+Say:
 
 **The paired intervals support positive mean savings for this fixed trained policy.**
 
@@ -249,19 +152,11 @@ between training seeds. The three intervals are individual, not simultaneous.
 
 ## 6:30–7:50 — Optimality, policy, and verification
 
-Screen instructions:
+Screen:
 
-- Show `## 6. Exact finite-horizon MDP reference`, then the recurrence in
-  `# 6B — backward induction and exact policy evaluation` and the fresh output
-  of `# 6D — save analytical comparison and per-state references`.
-- Show `## 7. BOOK/WAIT policy heatmap` and the figure from
-  `# 7A — draw and save the learned policy heatmap`.
-- Point at price columns, time rows, and mandatory BOOK at time zero.
-- Show the fresh verification output under
-  `# 9C — save actual run summary and trace`, plus
-  `# 2D — rewards, deadline, and termination checks` if needed for the PASS line.
+Show the recurrence in `# 6B — backward induction and exact policy evaluation`, the output of `# 6D — save analytical comparison and per-state references`, and the figure in `# 7A — draw and save the learned policy heatmap`. Finish with the PASS output in `# 9C — save actual run summary and trace`.
 
-Spoken narration:
+Say:
 
 **The implementation passed its checks, but the original learned policy is still suboptimal.**
 
@@ -285,17 +180,11 @@ checks supports correctness; it does not prove convergence or cover every bug.
 
 ## 7:50–8:50 — One minute on supplementary findings
 
-Screen instructions:
+Screen:
 
-- Show `### S3. Bounded five-seed/two-budget experiment` and the fresh paired
-  table and summaries in `# S3C — paired gap changes and mean/range summaries`.
-- Then show `# L4B — means and ranges across the five seeds` under
-  `## Learning Dynamics and Learning-Rate Comparison`.
-- If there is time, point briefly to
-  `# L4E — all-seed checkpoint gap plots with consistent axes`. Do not walk
-  through every run or plot line. All runs executed; only narration is selective.
+Show `# S3C — paired gap changes and mean/range summaries`, then `# L4B — means and ranges across the five seeds`. Spend about one minute on these supplementary findings.
 
-Spoken narration:
+Say:
 
 **The supplementary studies show that more training alone did not help, while the tested learning rates improved final performance.**
 
@@ -315,14 +204,11 @@ is different from test-trip uncertainty. The original policy was not replaced.
 
 ## 8:50–9:35 — Limits and answers to the three questions
 
-Screen instructions:
+Screen:
 
-- Show `## 10. Interpretation and limits` and
-  `# 10A — evidence-based interpretation`.
-- Briefly show `### L5. Cautious exploratory interpretation` for supplementary
-  limits. Keep the main Notebook as the shared screen.
+Show `## 10. Interpretation and limits` and `# 10A — evidence-based interpretation`.
 
-Spoken narration:
+Say:
 
 **The project supports savings inside this simulator, with clear limits on reliability and optimality.**
 
@@ -338,99 +224,14 @@ results proves savings on real flight prices.
 
 ## 9:35–10:00 — Close and leave the completed demo visible
 
-Screen instructions:
+Screen:
 
-- Return to the fresh `# 4E — official comparison and paired cost differences`
-  output. Keep your camera visible.
-- Use this slot as final navigation/breathing buffer; do not add more findings.
+Return to the fresh table in `# 4E — official comparison and paired cost differences`. Keep your camera visible. Use any remaining time for a clear closing.
 
-Spoken narration:
+Say:
 
 **The main lesson is to compare learning with fair baselines, uncertainty, and an exact reference.**
 
 This project demonstrates a complete Python Q-learning workflow, from the
-environment to evaluation and verification. Codex assisted with implementation,
-verification, and report preparation, as disclosed in the report.
+environment to evaluation and verification.
 Thank you for watching.
-
-## Recording requirements mapped to the plan
-
-| Requirement | Evidence in the recording |
-|---|---|
-| Approximately ten minutes | Timestamp plan; stopwatch rehearsal; full-run buffer and explicit slow-run contingency |
-| Camera on | Visible throughout, including terminal launch and fresh results |
-| Explain key code segments | 0:40 environment `2A`/`2B`; 1:55 updater `3B`, selector `3A`, loop `3C`; 3:20 evaluator `4C`; 6:30 exact recurrence `6B` |
-| Demo run of the whole project | Start the unchanged portable runner by 0:20; wait for all 80 cells and success; reload from disk at 4:20–4:50 |
-| Show actual completed results | Fresh means/trace at 4:50, intervals at 5:40, reference/heatmap/checks at 6:30, supplementary tables at 7:50 |
-| Explain findings and limitations | Three questions at 3:20 and 8:50; about one minute on supplements at 7:50 |
-| Distinguish saved and new output | Opening explicitly labels earlier outputs; completion declaration is conditional on actual success and reload |
-| Separate upload | Record video separately from the project ZIP and reviewed report, following course-portal instructions |
-
-## Camera, microphone, screen, and execution setup
-
-- [ ] Keep `PRESENTATION_SCRIPT.md` on an unshared screen or printed page. Share
-  the main Notebook window and its terminal panel, not your entire desktop.
-- [ ] Enable the camera and microphone. Test a short recording for sound and
-  readable code. Confirm the camera overlay does not cover tables or plots.
-- [ ] Turn off notifications. Close personal tabs and the practice Notebook.
-  Avoid showing credentials or unrelated files.
-- [ ] Open the project folder. Select `.venv/bin/python` and kernel
-  `Python (CS664 Flight Booking)` (`cs664-flight-booking`).
-- [ ] Use readable zoom. Collapse long outputs until needed. Use the Notebook
-  outline for headings and Find for the exact cell labels above. Cell labels,
-  not changing execution counters, identify what to display. The appendix also
-  has a `6A` label; do not confuse it with the analytical `6A` cell.
-- [ ] Check the main Notebook has no unsaved edits. Disable Auto Save in the
-  viewer. Keep all budgets, seeds, parameters, and cells unchanged.
-- [ ] Keep the terminal ready in the project root, with the full runner command
-  typed but not yet executed. Do not run a second kernel or a second training
-  job concurrently. Use the runner rather than Run All in the open viewer.
-- [ ] Review the success lines and safe reload steps. Know how to reopen the
-  Notebook without overwriting the new saved file.
-- [ ] Rehearse narration and navigation. If you choose a full rehearsal run,
-  measure its actual command time; it is not measured by this script-writing
-  task. Do not describe rehearsal as personal mastery without understanding it.
-- [ ] Start recording before launching the runner. Keep camera on. Confirm the
-  whole run succeeds before saying that results are fresh.
-- [ ] Watch the finished video for sound, readability, full-run evidence, and
-  duration before uploading. No submission or recording is performed here.
-
-## Sentences to rehearse
-
-These repeat the bold spoken sentences above in plain text. Memorize those
-anchors if helpful, and read the remaining narration naturally.
-
-1. This project uses Q-learning to study when to book a simulated flight at a lower expected cost.
-2. The environment makes every episode end with one purchase, within the allowed price range.
-3. Q-learning improves an action estimate by moving its old value toward a target.
-4. A fair comparison gives every strategy the same test paths and no future-price information.
-5. The fresh full run has completed, and these reloaded outputs come from that run.
-6. The original learned policy had the lowest sampled mean cost among the four strategies.
-7. The paired intervals support positive mean savings for this fixed trained policy.
-8. The implementation passed its checks, but the original learned policy is still suboptimal.
-9. The supplementary studies show that more training alone did not help, while the tested learning rates improved final performance.
-10. The project supports savings inside this simulator, with clear limits on reliability and optimality.
-11. The main lesson is to compare learning with fair baselines, uncertainty, and an exact reference.
-
-## Verification notes (not spoken)
-
-Spoken costs are rounded to cents from the saved CSVs. For example, $223.476
-rounds to $223.48 and $214.854 to $214.85. Rounded means must not be used to
-recalculate precise savings: the $180-rule saving is $4.884 before rounding.
-The CI quoted aloud rounds [$4.0293664935, $5.7386335065] to [$4.03, $5.74].
-The analytical gap is $8.434896, rounded to $8.43. The three rate means round
-from $220.978560, $213.3248832, and $209.164944 to $220.98, $213.32, and $209.16.
-
-Source map: `results/run_summary.json` (rules, seeds, settings, logged updates,
-trace, checks); `results/mean_cost_comparison.csv`; `results/paired_savings_95ci.csv`;
-`results/exact_mdp_comparison.csv`; `results/verification_results.csv`;
-`results/supplementary_paired_gap_changes.csv`;
-`results/learning_dynamics_across_seed_summary.csv`;
-`results/learning_dynamics_paired_comparisons.csv`;
-`results/learning_dynamics_final_comparison.csv`;
-and the main Notebook's execution timestamps and labels.
-
-This preparation document is outside the existing submission ZIP. No project
-implementation, official result, report, proposal, or practice attempt was changed
-for this task. A new demo run during your recording will generate fresh outputs;
-the existing ZIP is not automatically rebuilt by the runner.
