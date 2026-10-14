@@ -1,0 +1,20 @@
+{
+  "pdf_pages": 9,
+  "pdf_text_inside_page_bounds": true,
+  "key_report_numbers_present": true,
+  "docx_readable_and_tables_present": true,
+  "embedded_figures": 2,
+  "rendered_pages_folder": ".cache/report_preview",
+  "visual_review": {
+    "all_nine_pages_overview_inspected": true,
+    "detailed_pages_inspected": [
+      1,
+      7,
+      8,
+      9
+    ],
+    "observed_clipping_or_unreadable_figures": false,
+    "docx_layout_rendered": false,
+    "docx_editor_pagination_requires_student_review": true
+  }
+}

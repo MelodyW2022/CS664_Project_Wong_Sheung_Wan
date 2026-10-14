@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "saved_executed_cells": 80,
+  "training_rerun": false,
+  "recorded_cell_execution_seconds": 182.359948,
+  "timing_excludes": "kernel startup and runner postchecks",
+  "verified": [
+    "10000 paired costs and means",
+    "three paired Student-t intervals",
+    "exact costs/gap",
+    "actual logged update",
+    "complete trace",
+    "ten budget runs",
+    "fifteen rate runs",
+    "300 checkpoints/2100 diagnostics",
+    "reported means/ranges",
+    "saved PASS records",
+    "prose coverage, rate, action-switch, and update examples"
+  ]
+}

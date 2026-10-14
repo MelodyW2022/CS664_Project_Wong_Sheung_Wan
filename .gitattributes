@@ -1,0 +1,4 @@
+# Generated documents and archives are binary artifacts, not source text.
+*.pdf binary
+*.docx binary
+*.zip binary

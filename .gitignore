@@ -51,3 +51,7 @@ lecture-notes/
 lecture_notes/
 *lecture*notes*
 *Lecture*Notes*
+
+# Temporary submission staging and generated upload archive
+submission_staging/
+/CS664_Project_Wong_Sheung_Wan.zip

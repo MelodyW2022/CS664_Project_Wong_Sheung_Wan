@@ -21,6 +21,7 @@ os.chdir(ROOT)
 
 import nbformat
 from nbclient import NotebookClient
+from project_verification import numerical_evidence
 
 originals = [ROOT / "CS664_Project_Wong_Sheung_Wan_Proposal.md"]
 assignment_pdf = ROOT / "metcs664_TermProject.pdf"
@@ -30,9 +31,7 @@ practice_notebook = ROOT / "CS664_Flight_Booking_Practice.ipynb"
 practice_before = (hashlib.sha256(practice_notebook.read_bytes()).hexdigest()
                    if practice_notebook.exists() else None)
 before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
-original_results = [p for p in (ROOT / "results").rglob("*")
-                    if p.is_file() and not p.name.startswith("learning_dynamics_")]
-result_hashes = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in original_results}
+result_hashes = numerical_evidence(ROOT / "results")
 notebook_path = ROOT / "CS664_Flight_Booking.ipynb"
 notebook = nbformat.read(notebook_path, as_version=4)
 
@@ -50,7 +49,7 @@ code_cells = [cell for cell in notebook.cells if cell.cell_type == "code"]
 assert all(cell.execution_count is not None for cell in code_cells)
 assert not any(output.output_type == "error" for cell in code_cells for output in cell.outputs)
 assert before == {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in originals}
-assert result_hashes == {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in original_results}
+assert result_hashes == numerical_evidence(ROOT / "results")
 nbformat.validate(notebook)
 nbformat.write(notebook, notebook_path)
 print(f"PASS: {len(code_cells)} code cells executed in a fresh kernel; no cell errors.")
@@ -61,5 +60,5 @@ if practice_before == practice_after:
     print("Practice Notebook hash unchanged; this runner never writes it.")
 else:
     print("Practice Notebook changed during execution; this runner did not write it.")
-print("All original result files, including Q-values and visits, have unchanged hashes.")
+print("Original numerical evidence, including Q-values and visits, is unchanged.")
 print(f"Saved executed Notebook: {notebook_path}")

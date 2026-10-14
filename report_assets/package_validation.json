@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "archive_sha256": "fc45f1bb682bf2ac4369944e3e4796f14e3ad2994a5fc0dd1283243fcc8579db",
+  "files": 54,
+  "top_level_folder": "CS664_Project_Wong_Sheung_Wan",
+  "crc_check": true,
+  "temporary_extraction": true,
+  "byte_identical_copies": true,
+  "saved_80_cell_outputs_present": true,
+  "all_markdown_runtime_result_links_present": true,
+  "runtime_modules_compile": true,
+  "dependencies_pinned": true,
+  "excluded_materials_absent": true,
+  "packaged_fingerprint_relocation_and_numeric_change_fixtures": true,
+  "training_rerun": false
+}

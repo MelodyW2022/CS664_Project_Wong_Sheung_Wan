@@ -41,13 +41,23 @@ does this in a fresh kernel and saves actual outputs only after a successful run
 The supplementary investigation also trains ten independent models: five fixed
 seeds at 50,000 and 200,000 episodes. Allow extra execution time. The runner
 prints progress after each seed's pair and checks that the original result
-files remain unchanged. The learning-dynamics follow-up adds fifteen
+numerical evidence remains unchanged. The learning-dynamics follow-up adds fifteen
 instrumented 200,000-episode runs (three learning-rate conditions, five seeds),
 with exact evaluation every 10,000 episodes. The runner prints each completed
 run; allow additional execution time. Earlier original and supplementary result
-files are checked for unchanged hashes. No additional packages or commands
+numerical evidence is checked for unchanged fingerprints. Machine-specific
+execution metadata and re-rendered figure bytes are not numerical checks.
+No additional packages or commands
 are required. The runner never writes the practice Notebook and permits you
 to save your practice attempts while the main experiment runs.
+
+The latest saved 80-cell execution spans **182.36 seconds** from the first cell's
+busy timestamp to the last cell's idle timestamp. This recorded interval excludes
+kernel startup and runner postchecks; complete CLI wall time was not measured.
+It is an observation from the saved run, not a promised runtime on other machines.
+Full execution includes all supplementary training and may take longer than a
+core-results demo. `project_verification.py` is required by the runner and is
+included in the submission package.
 
 ## Official results
 
@@ -87,15 +97,27 @@ purchase. The official fixed threshold is **$180**.
 
 ## Submission files
 
-Include the main Notebook with saved outputs, main runner, requirements, README,
+Include the main Notebook with saved outputs, main runner and its verification
+module, requirements, README,
 RESULTS.md, proposal, and official `results/` in the project ZIP. Exclude
 `CS664_Flight_Booking_Practice.ipynb`, `PRACTICE_GUIDE.md`, `practice_results/`,
 and `verify_practice.py`; these are preparation materials. Also exclude `.venv/`,
 `.jupyter/`, `.git/`, `.tools/`, caches, credentials, and instructor materials.
-No submission ZIP has been created. Upload the final writeup PDF/Word file,
-project ZIP, and recording separately as the instructor PDF requires.
+The generated ZIP contains one top-level folder named
+`CS664_Project_Wong_Sheung_Wan`. The draft report PDF/DOCX stays outside it.
+`CS664_Project_Wong_Sheung_Wan.zip` has been created locally and verified by
+CRC checking, temporary extraction, and comparison of all 54 packaged files.
+Its main Notebook retains all 80 executed code cells and saved outputs.
+The separate draft report is available as `CS664_Project_Wong_Sheung_Wan.pdf`
+and editable `CS664_Project_Wong_Sheung_Wan.docx`. `SUBMISSION_CHECKLIST.md`
+in the source workspace records completed checks and your remaining actions;
+it is intentionally outside the ZIP. The ZIP and staging folder are excluded
+from Git; the report, build source, and verification records are versioned.
+Upload the reviewed report, project ZIP, and recording separately as the
+instructor PDF requires.
 
-Practice instructions and learning order are in [PRACTICE_GUIDE.md](PRACTICE_GUIDE.md).
+Practice instructions are in PRACTICE_GUIDE.md in the source workspace; that
+preparation document is intentionally excluded from the submission ZIP.
 
 Exact MDP references use known simulator probabilities; the learning agent
 never receives them. Sampled means and paired intervals use the shared held-out
