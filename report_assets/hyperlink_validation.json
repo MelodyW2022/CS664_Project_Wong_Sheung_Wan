@@ -1,9 +1,7 @@
 {
   "status": "PASS",
   "pdf_action_dictionaries_inspected": true,
-  "docx_all_relationship_parts_inspected": true,
   "pdf_links": [],
-  "docx_external_relationships": [],
   "no_active_hyperlinks": true,
   "training_rerun": false,
   "zip_contained_plain_text_paths": [

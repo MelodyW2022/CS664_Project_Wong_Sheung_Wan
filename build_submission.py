@@ -423,66 +423,6 @@ def make_documents(blocks):
     SimpleDocTemplate(str(pdf),pagesize=(8.5*inch,11*inch),leftMargin=.65*inch,rightMargin=.65*inch,
         topMargin=.6*inch,bottomMargin=.65*inch,title="Flight Booking Decision Assistant",author="Prepared for Sheung Wan Wong").build(flow,onFirstPage=footer,onLaterPages=footer)
 
-    from docx import Document
-    from docx.shared import Inches,Pt,RGBColor
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
-    document=Document()
-    section=document.sections[0]
-    section.page_width,section.page_height=Inches(8.5),Inches(11)
-    section.left_margin=section.right_margin=Inches(.65)
-    section.top_margin=section.bottom_margin=Inches(.6)
-    normal=document.styles['Normal'];normal.font.name='Calibri';normal.font.size=Pt(10)
-    normal.paragraph_format.space_after=Pt(6)
-    document.core_properties.title="Flight Booking Decision Assistant"
-    document.core_properties.author="Prepared for Sheung Wan Wong"
-    def add_linked_paragraph(text):
-        from docx.opc.constants import RELATIONSHIP_TYPE as RT
-        paragraph = document.add_paragraph()
-        end = 0
-        for match in re.finditer(r'\[([^\]]+)\]\(([^)]+)\)', text):
-            paragraph.add_run(text[end:match.start()])
-            link = OxmlElement('w:hyperlink')
-            link.set(qn('r:id'), paragraph.part.relate_to(match[2], RT.HYPERLINK, is_external=True))
-            run = OxmlElement('w:r')
-            props = OxmlElement('w:rPr')
-            color = OxmlElement('w:color'); color.set(qn('w:val'), '184E77'); props.append(color)
-            underline = OxmlElement('w:u'); underline.set(qn('w:val'), 'single'); props.append(underline)
-            run.append(props)
-            label = OxmlElement('w:t'); label.text = match[1]; run.append(label)
-            link.append(run); paragraph._p.append(link)
-            end = match.end()
-        paragraph.add_run(text[end:])
-    for kind,data in blocks:
-        if kind=='title':document.add_heading(data,0)
-        elif kind=='heading':document.add_heading(data,1)
-        elif kind=='paragraph':add_linked_paragraph(data)
-        elif kind=='pagebreak':document.add_page_break()
-        elif kind=='figure':
-            path,caption,width,height=data
-            paragraph=document.add_paragraph();paragraph.paragraph_format.keep_with_next=True
-            paragraph.add_run().add_picture(path,width=Inches(width),height=Inches(height))
-            document.add_paragraph(caption,style='Caption')
-        elif kind=='table':
-            headers,values,widths=data
-            table=document.add_table(rows=1,cols=len(headers));table.style='Light Shading Accent 1'
-            for cell,text in zip(table.rows[0].cells,headers):cell.text=str(text)
-            repeat=OxmlElement('w:tblHeader');table.rows[0]._tr.get_or_add_trPr().append(repeat)
-            for row in values:
-                for cell,value in zip(table.add_row().cells,row):cell.text=str(value)
-            table.autofit=False
-            for row in table.rows:
-                no_split=OxmlElement('w:cantSplit');row._tr.get_or_add_trPr().append(no_split)
-                for i,cell in enumerate(row.cells):
-                    cell.width=Inches(widths[i] if widths else 7.2/len(headers))
-                    for paragraph in cell.paragraphs:
-                        paragraph.paragraph_format.space_after=Pt(3)
-                        for run in paragraph.runs:run.font.size=Pt(9)
-            document.add_paragraph()
-    paragraph=section.footer.paragraphs[0]
-    paragraph.text='Page '
-    field=OxmlElement('w:fldSimple');field.set(qn('w:instr'),'PAGE');paragraph._p.append(field)
-    document.save(ROOT/f'{NAME}.docx')
     # A readable shared source for future human editing/rebuilding.
     markdown=[]
     for kind,data in blocks:
@@ -496,9 +436,8 @@ def make_documents(blocks):
     (ROOT/f'{NAME}.md').write_text('\n\n'.join(markdown)+'\n')
 
 
-def audit_exported_hyperlinks(pdf, doc):
-    """Inspect actual PDF action dictionaries and every DOCX relationship part."""
-    from lxml import etree
+def audit_exported_hyperlinks(pdf):
+    """Inspect actual PDF action dictionaries."""
     public = set()  # The report intentionally contains no active hyperlinks.
     pdf_targets = []
     for number, page in enumerate(pdf, 1):
@@ -510,26 +449,12 @@ def audit_exported_hyperlinks(pdf, doc):
             pdf_targets.append({'page': number, 'target': target,
                                 'raw_annotation': pdf.xref_object(xref)})
     assert {row['target'] for row in pdf_targets} == public
-    docx_targets = []
-    with zipfile.ZipFile(ROOT/f'{NAME}.docx') as archive:
-        for part in archive.namelist():
-            if not part.endswith('.rels'):
-                continue
-            for relation in etree.fromstring(archive.read(part)):
-                if relation.get('TargetMode') == 'External':
-                    target = relation.get('Target')
-                    assert relation.get('Type').endswith('/hyperlink') and target in public, (part, target)
-                    docx_targets.append({'part': part, 'target': target})
-    assert {row['target'] for row in docx_targets} == public
     return {'status': 'PASS', 'pdf_action_dictionaries_inspected': True,
-            'docx_all_relationship_parts_inspected': True,
-            'pdf_links': pdf_targets, 'docx_external_relationships': docx_targets,
-            'no_active_hyperlinks': True, 'training_rerun': False}
+            'pdf_links': pdf_targets, 'no_active_hyperlinks': True, 'training_rerun': False}
 
 
-def verify_pdf_and_docx():
+def verify_pdf_and_markdown():
     import pymupdf as fitz
-    from docx import Document
     from PIL import Image,ImageOps,ImageDraw
     folder=ROOT/'.cache'/'report_preview';folder.mkdir(parents=True,exist_ok=True)
     pdf=fitz.open(ROOT/f'{NAME}.pdf')
@@ -551,12 +476,6 @@ def verify_pdf_and_docx():
     for i,image in enumerate(thumbnails):
         x=(i%3)*326+10;y=(i//3)*426+20;sheet.paste(image,(x,y));draw.text((x,y-14),f'Page {i+1}',fill='black')
     sheet.save(folder/'contact_sheet.png')
-    doc=Document(ROOT/f'{NAME}.docx')
-    doc_text='\n'.join(p.text for p in doc.paragraphs)+'\n'+'\n'.join(c.text for t in doc.tables for r in t.rows for c in r.cells)
-    assert not re.search(r'(?i)\bdraft\b|awaiting student review', doc_text) and '9. Limitations' in doc_text
-    assert len(doc.inline_shapes)==1
-    for token in ['207.274224','215.709120','209.16','214.85']:
-        assert token in doc_text
     # Check all Q-table rows in their exported order, not just individual tokens.
     q_headers = ['Time remaining', 'Price', 'Q(BOOK)', 'Q(WAIT)', 'Greedy action']
     q = np.load(RESULTS/'q_values.npy')
@@ -565,11 +484,6 @@ def verify_pdf_and_docx():
                         'Not allowed' if time == 0 else f'{q[time, index, 1]:.3f}',
                         'BOOK' if time == 0 or q[time, index, 0] >= q[time, index, 1] else 'WAIT']
                        for time in range(6, -1, -1) for index, price in enumerate(prices)]
-    q_doc_tables = [table for table in doc.tables if [c.text for c in table.rows[0].cells] == q_headers]
-    assert len(q_doc_tables) == 1
-    assert [[c.text for c in row.cells] for row in q_doc_tables[0].rows[1:]] == expected_q_rows
-    from docx.oxml.ns import qn
-    assert q_doc_tables[0].rows[0]._tr.get_or_add_trPr().find(qn('w:tblHeader')) is not None
     q_pdf_values = []
     q_table_pages = []
     for number, page in enumerate(pdf, 1):
@@ -579,7 +493,7 @@ def verify_pdf_and_docx():
             start = lines.index('Greedy action') + 1
             q_pdf_values.extend(lines[start:])
     assert q_pdf_values == [cell for row in expected_q_rows for cell in row]
-    assert all(bad not in text and bad not in doc_text for bad in ['Å~', 'Ã—', '\ufffd'])
+    assert all(bad not in text for bad in ['Å~', 'Ã—', '\ufffd'])
     # Compare every retained paragraph and table cell across generated formats.
     normalize = lambda value: re.sub(r'\s+', '', value)
     plain = lambda value: re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', value)
@@ -595,9 +509,22 @@ def verify_pdf_and_docx():
             continue
         for value in expected:
             assert normalize(value) in normalize(text), ('PDF', value)
-            assert normalize(value) in normalize(doc_text), ('DOCX', value)
-    hyperlink_checks = audit_exported_hyperlinks(pdf, doc)
+    hyperlink_checks = audit_exported_hyperlinks(pdf)
     markdown = (ROOT/f'{NAME}.md').read_text()
+    for block in markdown.split('\n\n'):
+        block = block.strip()
+        if not block:
+            continue
+        if block.startswith('|'):
+            values = [cell.strip() for row in block.splitlines()
+                      if not re.fullmatch(r'[| :\-]+', row)
+                      for cell in row.strip('|').split('|')]
+        elif block.startswith('!['):
+            values = [re.match(r'!\[([^]]*)\]', block).group(1)]
+        else:
+            values = [re.sub(r'^#+\s*', '', block)]
+        for value in values:
+            assert normalize(plain(value)) in normalize(text), ('Markdown/PDF', value)
     # Validate every displayed project path against the existing submitted archive.
     evidence_paths = sorted(set(re.findall(
         r'(?<![\w/])[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:csv|json|ipynb|md|png|npy|npz)\b', markdown)))
@@ -607,10 +534,10 @@ def verify_pdf_and_docx():
     hyperlink_checks['zip_contained_plain_text_paths'] = evidence_paths
     (ASSETS/'hyperlink_validation.json').write_text(json.dumps(hyperlink_checks, indent=2) + '\n')
     result={'pdf_pages':len(pdf),'pdf_text_inside_page_bounds':True,'key_report_numbers_present':True,
-            'docx_readable_and_tables_present':True,'embedded_figures':1,
+            'embedded_figures':1,
             'all_paragraphs_and_table_cells_match_source':True,'evidence_links_valid':True,
             'all_35_exported_q_rows_checked_against_saved_array':True,
-            'q_table_pdf_pages':q_table_pages,'docx_q_table_repeating_header':True,
+            'q_table_pdf_pages':q_table_pages,
             'visible_encoding_errors_absent':True,
             'rendered_pages_folder':str(folder.relative_to(ROOT))}
     pdf.close()
@@ -630,7 +557,7 @@ def make_archive():
     with TemporaryDirectory(prefix='cs664-package-check-') as temp:
         with zipfile.ZipFile(archive) as z:
             assert z.testzip() is None
-            assert not any(n.endswith(('.pdf', '.docx')) for n in z.namelist())
+            assert not any(n.endswith('.pdf') for n in z.namelist())
             assert z.read(f'{NAME}/{NAME}.md') == (ROOT/f'{NAME}.md').read_bytes()
             assert set(z.namelist()) == {str(Path(NAME)/p.relative_to(ROOT)) for p in files}
             z.extractall(temp)
@@ -703,7 +630,7 @@ print('PASS: all discovered imports and installed pinned requirement versions')
         result = {'status': 'PASS', 'archive_sha256': fingerprint(archive), 'files': len(files),
                   'manifest': [str(p.relative_to(ROOT)) for p in files],
                   'top_level_folder': NAME, 'crc_check': True, 'temporary_extraction': True,
-                  'byte_identical_copies': True, 'report_markdown_included': True, 'report_pdf_and_docx_excluded_for_separate_submission': True, 'saved_80_cell_outputs_present': True,
+                  'byte_identical_copies': True, 'report_markdown_included': True, 'report_pdf_excluded_for_separate_submission': True, 'saved_80_cell_outputs_present': True,
                   'all_markdown_runtime_result_links_present': True, 'notebook_and_modules_compile': True,
                   'discovered_imports': sorted(imports), 'imports_succeeded_in_extracted_folder': True,
                   'installed_versions_match_pinned_requirements': True,
@@ -728,11 +655,11 @@ def main():
     summary,runtime=audit_saved_evidence()
     make_documents(report_blocks(summary,runtime))
     package_checks=None if report_only else make_archive()
-    document_checks=verify_pdf_and_docx()
+    document_checks=verify_pdf_and_markdown()
     assert before=={str(p.relative_to(ROOT)):fingerprint(p) for p in protected}
     (ASSETS/'preservation_validation.json').write_text(json.dumps({'status':'PASS',
         'protected_files_unchanged':True,'protected_sha256':before,'training_rerun':False},indent=2)+'\n')
-    print('Report created:',ROOT/f'{NAME}.pdf',ROOT/f'{NAME}.docx')
+    print('Report created:',ROOT/f'{NAME}.pdf',ROOT/f'{NAME}.md')
     print('PDF pages:',document_checks['pdf_pages'],'; rendered for visual inspection.')
     if package_checks:
         print('ZIP verified:',ROOT/f'{NAME}.zip','files:',package_checks['files'])

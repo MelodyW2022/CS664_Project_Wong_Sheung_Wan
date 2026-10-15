@@ -3,23 +3,20 @@
 Target upload: **October 14, 2026, 11 PM MST**.
 Official deadline provided by the student: **October 15, 2026, 3 AM MST**.
 
-The report is a draft awaiting your review. No course-portal upload, recording,
+The report has student approval. No course-portal upload, recording,
 or personal practice completion is established by the automated work.
 
 ## Separate deliverables
 
 - [ ] Review and upload `CS664_Project_Wong_Sheung_Wan.pdf` as the writeup.
-  `CS664_Project_Wong_Sheung_Wan.docx` is the editable alternative; the course
-  PDF permits PDF or Word. After editing the DOCX, export a matching final PDF
-  before uploading; edits do not automatically synchronize the two files.
+  The editable Markdown report is included in the ZIP; submit the matching PDF separately.
 - [ ] Upload `CS664_Project_Wong_Sheung_Wan.zip` as the project package.
 - [ ] Record and upload the approximately 10-minute, camera-on presentation
   separately. Explain the key code and demonstrate full project execution.
 - [ ] Confirm the English proposal's separate upload is present if required by
-  the course portal; the original Markdown is also preserved inside the ZIP.
+  the course portal; the proposal Markdown remains outside the ZIP.
 
-All four requested generated deliverables are in the project root. Reports
-and this checklist stay outside the ZIP. The ZIP contains one top-level folder
+The PDF and this checklist stay outside the ZIP; the editable report Markdown is included. The ZIP contains one top-level folder
 `CS664_Project_Wong_Sheung_Wan/`. Staging is in
 `submission_staging/CS664_Project_Wong_Sheung_Wan/` and is not committed.
 
@@ -45,7 +42,7 @@ and this checklist stay outside the ZIP. The ZIP contains one top-level folder
   convergence, an optimal learning rate, a unique cause, or real-flight savings.
 - [ ] Review limitations and references. Confirm any additional course guidance
   on AI assistance personally.
-- [ ] Decide whether to retain the draft label or produce a reviewed final version.
+- [x] Student approved the final report and removal of draft labels.
 
 ## Checks completed by the assistant
 
@@ -56,13 +53,11 @@ and this checklist stay outside the ZIP. The ZIP contains one top-level folder
   supplementary tables, and their summaries against saved evidence.
 - [x] Found 80 sequentially executed main code cells with no saved error outputs.
   The existing recorded full run was used; training was not rerun for packaging.
-- [x] Rendered all five PDF pages, inspected the page overview and detailed
-  tables/figures, and checked text bounds. Opened the DOCX and checked tables,
-  editable text, and its embedded heatmap. DOCX pagination can vary by editor.
+- [x] Rendered all seven PDF pages, inspected tables and figures, and checked text bounds.
 - [x] ZIP CRC check passed. Extracted the ZIP to a temporary directory and
   confirmed all 54 files match their sources, correct top-level folder, all
   linked runtime/result artifacts, required modules, and pinned dependencies.
-- [x] Confirmed practice materials, report PDF/DOCX, checklist, course materials,
+- [x] Confirmed practice materials, separate report PDF, checklist, course materials,
   environments, credentials, Git, and tools are absent from the ZIP.
 - [x] Corrected the runner's interpreter-path-sensitive numerical fingerprint:
   machine-specific execution metadata no longer causes a false comparison

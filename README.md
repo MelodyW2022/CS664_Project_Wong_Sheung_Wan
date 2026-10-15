@@ -64,8 +64,8 @@ The simulator probabilities are hypothetical. Sampled means and paired intervals
 are distinct from exact model expectations; none establishes real-flight savings.
 
 The Markdown report is included in the ZIP; upload the matching PDF separately.
-A DOCX is not needed for submission. The proposal Markdown is optional and is not
-needed by the current execution or evidence references, so it is excluded.
+The proposal Markdown is optional and is not needed by the current execution
+or evidence references, so it is excluded.
 The ZIP also excludes instructor materials, practice materials, presentation scripts,
 development audits, environments, caches, and credentials. Those working-project
 files have not been deleted. Package verification checks saved outputs, imports,

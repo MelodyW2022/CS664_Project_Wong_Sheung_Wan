@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "archive_sha256": "bba6c4b42fa13dc87a3c033f1e7c929ebbae1bdf6a17823b8cff2c1f5f57ce38",
+  "archive_sha256": "49521b387d9035a05357a16463f2140ddbf09cb2c8d00777048c678dade64038",
   "files": 54,
   "manifest": [
     "CS664_Flight_Booking.ipynb",
@@ -63,7 +63,7 @@
   "temporary_extraction": true,
   "byte_identical_copies": true,
   "report_markdown_included": true,
-  "report_pdf_and_docx_excluded_for_separate_submission": true,
+  "report_pdf_excluded_for_separate_submission": true,
   "saved_80_cell_outputs_present": true,
   "all_markdown_runtime_result_links_present": true,
   "notebook_and_modules_compile": true,
