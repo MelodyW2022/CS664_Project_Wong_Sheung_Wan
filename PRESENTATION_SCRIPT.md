@@ -2,151 +2,112 @@
 
 ## Opening (0:00–0:40, approximate)
 
-Hello, my name is Sheung Wan Wong. My project is called Flight Booking Decision Assistant.
+Hello, my name is Sheung Wan Wong. My project is Flight Booking Decision Assistant.
 (Show the Notebook title; keep your camera on.)
 
-**The goal is to learn when to book a simulated flight at a lower average cost.** I’ll start the full run now.
+I’ll start the full run now.
 (From the project root, enter `time .venv/bin/python run_notebook.py` by about 0:20.)
 
-I previously ran the full Notebook successfully. I’ll walk through the code and the saved results from that run while the fresh run executes.
-(Keep the main Notebook visible; the outputs currently shown are from the earlier run.)
+The goal is to learn when to book at a lower average cost. I previously ran the full Notebook successfully. These displayed outputs are from that earlier run.
+(Keep the main Notebook visible while the fresh run executes.)
 
 ## 1. Setup and fixed experiment settings (0:40–0:55, approximate)
 
-The model uses five ticket prices, from 120 to 360 dollars. Training and testing use different random seeds.
-(Point to `PRICES`, `TRAIN_SEED`, and `TEST_SEED` in Cell 1A.)
+Training and testing use different random seeds.
+(Point to `TRAIN_SEED` and `TEST_SEED` in Cell 1A.)
 
 ## 2. Price simulator (0:55–1:55, approximate)
 
-Let’s start with how prices change. Each day, the price can rise by 60 dollars, stay the same, or fall by 60 dollars.
-(Point to `rng.choice([60, 0, -60], p=probabilities)` in Cell 2A.)
+Daily prices can rise, stay unchanged, or fall. These probabilities are assumptions. The chance of falling changes from forty percent earlier to twenty percent near the deadline.
+(Point to `probabilities` and `rng.choice` in Cell 2A.)
 
-Earlier in the trip, the chance of a fall is 40 percent. Near the deadline, it is 20 percent. These are assumptions, not patterns measured from real flights.
-(Point to the two `probabilities` tuples in Cell 2A.)
-
-The price stays between 120 and 360 dollars.
+Clipping keeps prices between one hundred twenty and three hundred sixty dollars.
 (Point to `np.clip` in Cell 2A.)
 
-Let’s look at one booking episode. The state contains price and time remaining. There are seven opportunities, from time six to zero. Each starting price is equally likely.
+The state contains price and time remaining. There are seven opportunities.
 (Point to `reset` in Cell 2B.)
 
-The program rejects another action after purchase and forces BOOK at time zero.
-(Point to `if self.done`, then `effective_action`, in Cell 2B.)
-
-**Booking pays the current price and ends the episode.** Its reward is the negative price, so a cheaper purchase gives a better reward.
-(Point to `self.done = True` and `return None, -price, True, effective_action` in Cell 2B.)
-
-WAIT gives zero reward and moves forward one day.
-(Point to the final two lines of Cell 2B.)
+BOOK gives a negative price reward and ends the episode. WAIT gives zero reward and advances one day. The deadline forces BOOK.
+(Point to `effective_action`, the BOOK return, and the WAIT return in Cell 2B.)
 
 ### 2C. Verify the simulator before training (1:55–2:10, approximate)
 
-These checks cover the price boundaries, rewards, forced booking, and stopping after purchase. This is saved evidence from the earlier run.
-(Point to the assertions and saved PASS output in Cells 2C and 2D.)
+These checks cover boundaries, rewards, deadline booking, and rejection of actions after purchase.
+(Point to the saved PASS output in Cells 2C and 2D.)
 
 ## 3. Tabular Q-learning (2:10–3:00, approximate)
 
-Here, the agent chooses the action with the higher Q-value. The deadline always means BOOK.
-(Point to `best_action` in Cell 3A.)
+Training explores both actions. Over the first forty thousand episodes, the random choice rate falls to five percent, then stays there. Testing chooses the higher Q-value without exploration or updates.
+(Point to `best_action`, `epsilon_for`, and `choose_training_action` in Cell 3A.)
 
-Training also needs exploration. The chance of a random choice falls from one to five percent over the first 40,000 episodes, then stays there.
-(Point to `epsilon_for`, then the random branch in `choose_training_action`, in Cell 3A.)
-
-During testing, there are no random choices or Q updates.
-(Keep Cell 3A visible.)
-
-Here is how the table learns. For BOOK, the target is just the reward. For WAIT, it also includes the best estimated value at the next state. Only BOOK is allowed at a deadline next state.
-(Point to the two target assignments in Cell 3B.)
-
-The update moves the old value toward the target. Gamma is one, so future cost is not discounted.
-(Point to `old + alpha * (target - old)` in Cell 3B.)
+For BOOK, the target is reward alone. For WAIT, it includes the best estimated next action value. Deadline WAIT is excluded. Gamma is one, so future cost is not discounted.
+(Point to the two target branches in Cell 3B.)
 
 ### 3C. Train 50,000 episodes (3:00–3:50, approximate)
 
-The original training starts with a zero-filled table and runs 50,000 episodes. Each episode stops after purchase.
-(Point to `q = np.zeros`, the `update_q` call, and `if done` / `break` in Cell 3C.)
+Training starts with zeros and runs fifty thousand episodes.
+(Point to `q = np.zeros` and the episode loop in Cell 3C.)
 
-Here is an actual logged example from the first episode. The agent booked at 120 dollars. The old value was zero, the target was negative 120, and the learning rate was 0.1. **The updated Q-value was negative 12.**
+In the first episode, BOOK had an old value of zero and a target of negative one hundred twenty. With a learning rate of zero point one, **the updated value became negative twelve.**
 (Point to the first observed update in Cell 3D.)
 
-(At this section boundary, check the terminal for `PASS: 80 code cells executed in a fresh kernel; no cell errors.`, unchanged numerical evidence, the saved-Notebook message, and a returned prompt. Only after success, reload the Notebook from disk without saving the old viewer.)
+(Check the terminal for all eighty code cells completed, unchanged numerical evidence, the saved-path message, and a returned prompt. Reload from disk before continuing; never save the stale viewer.)
 
-The full run has now finished, including both supplementary studies. I’ve reopened the saved Notebook. The results from this point are from the completed fresh run.
-(Say this only after success and reload; otherwise wait and follow the separate checklist.)
+The full run has finished, including both supplementary studies. These reopened outputs are fresh.
+(Say this only after successful completion and reload; otherwise wait.)
 
 ## 4. Fair evaluation on 10,000 fresh trajectories (3:50–4:45, approximate)
 
-For the comparison, all four strategies receive the same 10,000 new test paths. Testing uses a separate random seed from training.
-(Point to `test_paths` and `TEST_SEED` in Cell 4A.)
+All four strategies share ten thousand new test paths.
+(Point to `test_paths` in Cell 4A.)
 
-The rules are to buy immediately, buy at 120 dollars or the deadline, buy at 180 dollars or below or the deadline, and follow Q-learning.
-(Point to `immediate_policy`, `threshold_policy`, and `learned_policy` in Cell 4B.)
+They buy immediately, at one hundred twenty, at one hundred eighty or below, or follow Q-learning. Both price rules buy at the deadline if necessary.
+(Point to the policy functions in Cell 4B; the threshold includes equality.)
 
-The evaluator stores the whole path, but each decision receives only today’s price and time remaining. It stops calling the policy after purchase.
-(Point to `policy(state)` and the return inside the BOOK branch in Cell 4C.)
+Each decision sees only current state and stops after purchase. It never receives tomorrow’s price.
+(Point to `policy(state)` and the BOOK return in Cell 4C.)
 
-There are three questions: Does Q-learning lower costs? How reliable are the savings? How close is it to the best possible policy, and does the program follow the rules?
+We ask whether costs fall, how reliable savings are, and how close the policy is to optimal with correct code.
 (Keep Cell 4C visible.)
 
-Here are the averages. Buying immediately cost $239.58. The 120-dollar rule cost $223.48, and the 180-dollar rule cost $219.74. Q-learning cost $214.85.
-(Follow the four rows in the `Mean purchase cost` column of Cell 4E.)
-
-**Q-learning had the lowest average purchase cost in this test.** Another test sample could give slightly different averages.
-(Point to the Q-learning row in Cell 4E.)
+**Q-learning has the lowest test average**, about two hundred fourteen dollars and eighty five cents.
+(Point down all four `Mean purchase cost` rows in Cell 4E.)
 
 ## 5. One complete Q-learning decision trace (4:45–5:10, approximate)
 
-This table follows one trip from start to finish. The agent starts at $360, keeps waiting, and finally books at the deadline for $360. The last row ends the episode.
-(Follow all seven rows in Cell 5A, from the first state to the final BOOK and purchase cost.)
-
-Average savings do not mean savings on every trip. This example explains the decisions; it does not estimate overall performance.
-(Keep the complete trace visible.)
+This complete trace waits until the deadline, then buys for three hundred sixty dollars. Average savings do not guarantee savings on every trip.
+(Follow all seven state/action rows to the final BOOK and purchase cost in Cell 5A.)
 
 ## 6. Exact finite-horizon MDP reference (5:10–5:55, approximate)
 
-Because we know the simulator’s probabilities, we can calculate expected costs without sampling test paths. The calculation starts at the deadline and works backward, comparing buying now with waiting. The learning agent does not receive this probability table.
-(Point to `values[0] = PRICES`, then `waiting_cost`, in Cell 6B.)
+Known simulator probabilities let us calculate expected costs without sampling test paths. We work backward, comparing buying with waiting. The learner never receives these probabilities.
+(Point to `waiting_cost` in Cell 6B.)
 
-The best possible policy costs about $207.27 on average. The original learned policy costs about $215.71. That leaves a gap of about $8.43.
-(Follow the `Optimal MDP`, `Learned policy`, and `Gap above optimum` rows in Cell 6D.)
-
-**The learned policy still leaves room for improvement.** These are calculated model expectations, which is why they differ from the earlier test averages.
-(Keep the same table visible.)
+The learned policy costs about eight dollars and forty three cents above the optimum. These are model expectations, not test averages.
+(Point to the optimum, learned-policy cost, and gap in Cell 6D.)
 
 ## 7. BOOK/WAIT policy heatmap (5:55–6:15, approximate)
 
-Here, each square tells us whether to BOOK or WAIT at a given price and time. Every square at the deadline says BOOK.
-(Point to the price columns, time rows, and mandatory BOOK deadline row in Cell 7A.)
+Each square shows BOOK or WAIT for a price and time. Every deadline square says BOOK.
+(Point to the axes and deadline row in Cell 7A.)
 
 ## 8. Paired 95% confidence intervals (6:15–7:00, approximate)
 
-Here, I’m comparing Q-learning with the rule that buys at 180 dollars or below. On the same trips, Q-learning saved about $4.88 on average.
-(Point to the $180 baseline row and `Mean Q-learning saving`, $4.884, in Cell 8B.)
+Compared with the threshold rule, average saving is about four dollars and eighty eight cents.
+(Point to the $180 row in Cell 8B.)
 
-The 95 percent confidence interval runs from about $4.03 to $5.74. Both ends are above zero, which supports positive average savings in this model.
-(Point to that row’s `Paired 95% CI`, [$4.029, $5.739].)
-
-This interval is about the average, not each trip. It does not measure how much another training seed would change the policy. The 95 percent level applies to each comparison separately.
-(Stay on the same row.)
-
-**All three comparisons support positive average savings for this trained policy.**
-(Point to the positive lower endpoints in the other two rows of Cell 8B.)
+The ninety five percent interval is about four dollars and three cents to five dollars and seventy four cents. It concerns average savings, not individual trips or different training seeds. All three intervals stay above zero for this trained policy.
+(Point to that interval and the other positive lower endpoints in Cell 8B.)
 
 ## 9. Save actual results and verification evidence (7:00–7:25, approximate)
 
-The program saves the tables, price paths, learned values, and complete trace for review.
-(Point to the array and CSV exports in Cell 9B.)
-
-It also checked that changing prices after purchase did not change the decisions. The core checks passed, but testing these cases cannot rule out every possible bug.
-(Point to `PASS: 400 future-suffix invariance cases; all core checks passed.` in Cell 9C.)
+The checks passed, but cannot rule out every bug.
+(Point to the core-check PASS message in Cell 9C.)
 
 ## 10. Interpretation and limits (7:25–7:55, approximate)
 
-The original comparison supports lower average costs, and the intervals describe uncertainty for that trained policy. The exact reference still shows a gap.
-(Point to the printed interpretation in Cell 10A.)
-
-The prices and probabilities are made up for this experiment. The model leaves out refunds, cancellations, and sold-out flights. **These results apply to simulated prices, not real flight prices.**
-(Point to the lines about hypothetical probabilities and no real-flight recommendation in Cell 10A.)
+**These results concern simulated prices, not real flights.** The model omits refunds, cancellations, and sold-out flights.
+(Point to the limitations in Cell 10A.)
 
 ## 11. Essential cells to personally run and explain before recording (7:55–8:00, approximate)
 
@@ -154,12 +115,11 @@ The prices and probabilities are made up for this experiment. The model leaves o
 
 ## Appendix. Optional threshold demonstration (8:00–8:05, approximate)
 
-(Leave the optional threshold unchanged and continue downward.)
+(Leave the optional threshold unchanged.)
 
 ## Supplementary Validation and Optimality Investigation (8:05–8:08, approximate)
 
-Two supplementary studies looked at the remaining gap.
-(Keep this section heading visible.)
+(Continue into the supplementary investigation.)
 
 ### S1. Verify the implementation (8:08–8:11, approximate)
 
@@ -167,61 +127,52 @@ Two supplementary studies looked at the remaining gap.
 
 ### S2. Inspect original experience coverage and action optimality (8:11–8:17, approximate)
 
-Seven states had worse-than-optimal decisions, despite visits to both actions. Visits alone do not explain the cause.
-(Point to the suboptimal-state table in Cell S2C.)
+(Point to the visit counts and suboptimal decisions in Cell S2C.)
 
 ### S3. Bounded five-seed/two-budget experiment (8:17–8:32, approximate)
 
-The first study restarted five training seeds at 50,000 and 200,000 episodes. With the original settings, all five final costs were higher at 200,000. More training alone did not help here; two budgets do not establish a continuous trend.
-(Point to the five negative paired gap changes in Cell S3C.)
+Each seed restarts at fifty thousand and two hundred thousand episodes. Across five seeds, more training worsened every final policy under the original settings.
+(Point to all five paired budget changes in Cell S3C.)
 
 ### S4. Review learning rate and exploration (8:32–8:35, approximate)
 
-(Point to the unchanged alpha and epsilon checks in Cell S4A.)
+(Point to the unchanged settings in Cell S4A.)
 
 ### Supplementary conclusion (8:35–8:37, approximate)
 
-(Continue downward past the budget-study conclusion.)
+(Continue downward.)
 
 ## Learning Dynamics and Learning-Rate Comparison (8:37–8:40, approximate)
 
-The next study changed the learning rate.
-(Keep this section heading visible.)
+(Continue to the learning-rate study.)
 
 ### L1. Prespecify fifteen runs (8:40–8:45, approximate)
 
-It kept 200,000 episodes per run and used five seeds for each setting.
-(Point to the recorded conditions and episode budget in Cell L1A.)
+(Point to the three conditions and fixed episode budget in Cell L1A.)
 
 ### L2. Verify rates, counters, legal updates, and checkpoint isolation (8:45–8:47, approximate)
 
-(Point briefly to the counter and checkpoint checks in Cells L2B and L2D.)
+(Point briefly to the checkpoint checks.)
 
 ### L3. Train and record every run (8:47–8:49, approximate)
 
-(Scroll past the fifteen completed run cells without rerunning them.)
+(Scroll past the completed runs without rerunning them.)
 
 ### L4. Display all results and state-level associations (8:49–9:05, approximate)
 
-Both alternatives improved all five final policies.
-(Point to the five positive reductions for each alternative in Cell L4A.)
-
-Average model costs were about $220.98 with 0.1, $213.32 with 0.03, and $209.16 with visit-based decay. Every final policy still cost more than the optimum.
-(Point to the mean and minimum cost columns in Cell L4B.)
+The settings are zero point one, zero point zero three, and visit based decay. Changing learning rates improved all five final policies, but none reached the optimum. The original policy remains unchanged.
+(Point to the positive paired reductions in Cell L4A, then costs in Cell L4B.)
 
 ### Observed state-level examples from this execution (9:05–9:08, approximate)
 
-(Continue past the recorded state-level examples.)
+(Continue past the recorded examples.)
 
 ### L5. Cautious exploratory interpretation (9:08–9:20, approximate)
 
-**The learning-rate changes helped under these tested conditions.** We still do not have a complete explanation for the remaining gap. These experiments do not prove the settings are best or that training will reach the optimum.
-(Point to the cautious interpretation and the two `improves 5/5 seeds` messages in Cell L5A.)
+The rate effect is demonstrated here; the remaining gap is not fully explained. These runs do not prove convergence.
+(Point to the interpretation and improvement messages in Cell L5A.)
 
 ## Closing (9:20–10:00, approximate)
 
-The original policy had the lowest test average. The intervals support average savings, while the exact reference shows a remaining gap. The checks support the implementation within the cases tested.
-(Stay at the end of the Notebook; do not jump back to earlier tables.)
-
-**The main lesson is to compare learning with fair baselines, uncertainty, and an exact reference.** Thank you for watching.
-(Keep your camera visible.)
+**The policy saved money, uncertainty remains, and the exact reference shows room for improvement.** Thank you.
+(Stay at the end of the Notebook with your camera visible.)
