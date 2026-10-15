@@ -2,7 +2,7 @@
   "status": "PASS",
   "saved_executed_cells": 80,
   "training_rerun": false,
-  "recorded_cell_execution_seconds": 182.359948,
+  "recorded_cell_execution_seconds": 172.401428,
   "timing_excludes": "kernel startup and runner postchecks",
   "verified": [
     "10000 paired costs and means",

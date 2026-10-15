@@ -2,82 +2,60 @@
 
 CS664 Term Project | Prepared for Sheung Wan Wong | October 14, 2026
 
-DRAFT — awaiting student review. This report records executed computational work; it does not establish personal practice, presentation readiness, or submission.
+DRAFT — awaiting student review.
 
-## 1. Goal, classification, and scope
+## 1. Project goal and simulator
 
-This machine learning application uses Python tabular Q-learning to choose BOOK or WAIT for a simulated traveler with a fixed departure date. Its goal is to investigate whether current fare and time remaining reduce expected purchase cost relative to simple booking rules. It is a small teaching model, not a real-airfare forecasting service.
+This Python tabular Q-learning application chooses BOOK or WAIT for a simulated traveler with a fixed departure date. It tests whether current fare and time remaining can reduce expected purchase cost relative to simple booking rules. The proposal specified a seven-opportunity simulator, 50,000 training episodes, four strategies on 10,000 shared test paths, paired uncertainty estimates, an exact MDP reference, a policy heatmap, a decision trace, and verification [1, 2]. Supplementary experiments examine training budget and learning rate separately from the original comparison.
 
-The original English proposal planned a seven-opportunity simulator, 50,000 training episodes, a four-strategy comparison on 10,000 fresh shared price paths, paired uncertainty estimates, an exact MDP reference, a policy heatmap, a trace, and program checks. That scope was completed without revising the proposal or changing the simulator or four strategies. Later exploratory extensions investigated five seeds at two training budgets and three prespecified learning-rate conditions. These extensions remain separate from the original policy and its sampled comparison.
+State is (time remaining, current price). Seven daily purchase opportunities run from time 6 to 0; fares are $120, $180, $240, $300, and $360. The starting fare is uniform over these five levels. WAIT uses the probability regime for the time before the action:
 
-The three validation questions are: (1) Does Q-learning reduce cost versus the baselines? (2) How reliable are the observed savings? (3) How close is the learned policy to optimal, and does the implementation follow the rules? The instructor's CS664 Term Project PDF supplies the official requirements; the proposal is the implementation plan [1, 2].
-
-## 2. Simulator and decision process
-
-State is (time remaining, current price). Seven daily purchase opportunities run from time 6 to time 0, with prices $120, $180, $240, $300, and $360. The initial price is uniform over these five levels. This is an artificial teaching horizon, not a recommended real-world booking window.
-
-| Time before WAIT | +$60 | Unchanged | -$60 |
+| Time before WAIT | +$60 | Unchanged | −$60 |
 | --- | --- | --- | --- |
 | 6–3 | 30% | 30% | 40% |
 | 2–1 | 60% | 20% | 20% |
 
-WAIT gives reward 0, reduces time by one, and samples the next price using the regime before the action. An attempted move outside $120–$360 stays at the boundary. BOOK pays the current fare, gives reward equal to its negative, and terminates. At time 0 only BOOK is legal; a requested WAIT is converted to BOOK. Further steps after purchase raise an error until reset. There are no refunds, cancellations, or sold-out events. Probabilities are hypothetical, not measured flight-price patterns.
+WAIT gives reward 0 and reduces time by one. Moves beyond $120–$360 stay at the boundary. BOOK gives the negative current fare as reward and terminates. At time 0, BOOK is mandatory and a requested WAIT becomes BOOK. Actions after purchase raise an error until reset. Refunds, cancellations, and sold-out events are excluded. All probabilities are hypothetical.
 
-## 3. Q-learning method and key code
+## 2. Training and an observed Q-value update
 
-Q-learning updates state/action values from observed rewards and next states [3]. The agent does not receive the transition-probability table. Maximizing the undiscounted negative purchase reward minimizes eventual cost. The Q-table starts at zero with shape 7 × 5 × 2; 65 state/action pairs are legal because deadline WAIT is excluded. Greedy ties choose BOOK.
+The agent learns from observed transitions without receiving their probability table [3]. Maximizing undiscounted negative purchase reward minimizes cost. Its zero-initialized Q-table has shape 7 × 5 × 2, with 65 legal state/action pairs; deadline WAIT is excluded and greedy ties choose BOOK.
 
 | Original setting | Value |
 | --- | --- |
-| Training episodes | 50,000 |
-| Learning rate / gamma | 0.1 / 1.0 |
+| Episodes / learning rate / gamma | 50,000 / 0.1 / 1.0 |
 | Training / test seeds | 66401 / 66402 |
-| Exploration | Epsilon 1.0 on episode 1 to 0.05 on episode 40,000; hold 0.05 afterward |
-| Evaluation | Greedy actions, epsilon 0, no Q updates |
+| Epsilon schedule | 1.0 on episode 1 to 0.05 on episode 40,000; then 0.05 |
+| Evaluation | Greedy; epsilon 0; no Q updates |
 
-The update is Q_new = Q_old + alpha × (target − Q_old). For terminal BOOK, target = reward only. Otherwise target = reward + gamma × the largest legal next-state Q-value. At a deadline next state, only BOOK enters the bootstrap target.
+Q_new = Q_old + alpha × (target − Q_old). Terminal BOOK uses target = reward; otherwise target = reward + gamma × max Q(next state, legal action). Only BOOK is legal in a deadline next state.
 
-| Actual logged update | Observed value |
-| --- | --- |
-| Episode / state / action | 1 / (6, $120) / BOOK |
-| Old value | 0.0 |
-| Reward / terminal target | -120 / -120 |
-| Alpha | 0.1 |
-| Updated value | -12.0 |
+Actual logged example: episode 1, state (6, $120), BOOK. Old Q = 0, reward and terminal target = -120, alpha = 0.1. Thus Q_new = 0 + 0.1 × (−120 − 0) = -12. The saved update is in [run_summary.json](results/run_summary.json).
 
-Thus 0 + 0.1 × (-120 − 0) = -12. An actual WAIT update at episode 376, state (1, $240), had old value 0, reward 0, target -30, and updated value -3. With gamma 1, its best legal future estimate at that training moment was -30; this is not the final Q-table's exact expected cost.
+## 3. Original sampled four-strategy comparison
 
-| Key code | Purpose |
-| --- | --- |
-| next_price; FlightBookingEnv.step | Probability regimes, clipping, rewards, forced deadline purchase, and termination |
-| update_q; choose_training_action | Terminal/nonterminal targets, epsilon-greedy exploration, and legal greedy actions |
-| train_q_learning; play_path | Independent episode training and stop-at-purchase state-only evaluation |
-| solve_optimal_mdp; exact_policy_values | Backward induction and fixed-policy analytical expectations |
-
-## 4. Original sampled four-strategy evaluation
-
-All strategies were evaluated on the same 10,000 new seven-price trajectories, generated with test seed 66402, separate from original training seed 66401. Pre-generation belongs to the evaluator: every decision function receives only its current state, never future prices. Evaluation stops at purchase, forces deadline booking, uses no exploration, and leaves Q unchanged. NumPy's seeded Generator supports reproducible random streams [5].
+All four strategies used the same 10,000 fresh seven-price paths, generated with test seed 66402 independently of training seed 66401 [5]. Only the evaluator sees complete paths: each policy receives its current state, stops at purchase, and must book at the deadline. Evaluation has no exploration or Q updates. The $180 threshold was specified from analytical model knowledge in the proposal, without searching the test paths.
 
 | Strategy | Rule | Sample mean cost |
 | --- | --- | --- |
-| Immediate booking | BOOK first day | $239.580 |
-| Minimum-price rule ($120) | BOOK at $120; else deadline | $223.476 |
-| Fixed-threshold rule ($180) | BOOK at $180 or below; else deadline | $219.738 |
-| Q-learning (greedy) | Original 50,000-episode greedy policy | $214.854 |
-
-The $180 baseline was chosen from analytical model knowledge in the original proposal, not by searching the test trajectories. The original Q-learning policy is retained; improved supplementary models do not replace it.
+| Immediate booking | BOOK first day | $239.58 |
+| Minimum-price rule ($120) | BOOK at $120; else deadline | $223.48 |
+| Fixed-threshold rule ($180) | BOOK at $180 or below; else deadline | $219.74 |
+| Q-learning (greedy) | Original greedy policy | $214.85 |
 
 | Baseline | Mean paired saving | Individual paired 95% CI |
 | --- | --- | --- |
-| Immediate booking | $24.726 | [$23.837947, $25.614053] |
-| Minimum-price rule ($120) | $8.622 | [$7.240777, $10.003223] |
-| Fixed-threshold rule ($180) | $4.884 | [$4.029366, $5.738634] |
+| Immediate booking | $24.73 | [$23.84, $25.61] |
+| Minimum-price rule ($120) | $8.62 | [$7.24, $10.00] |
+| Fixed-threshold rule ($180) | $4.88 | [$4.03, $5.74] |
 
-Saving is baseline cost minus Q-learning cost on the same trajectory. The interval is mean(d) ± t(0.975, 9999) × sample_sd(d)/sqrt(10000), using SciPy's Student-t quantile [4]. All three intervals are above zero for this fixed policy and sample. They are large-sample approximations for mean savings, not ranges containing 95% of individual-trip savings; they are not simultaneous intervals and do not measure variability across training seeds.
+Saving is baseline cost minus Q-learning cost on the same path. Each interval is mean(d) ± t(0.975, 9999) × sample_sd(d)/sqrt(10000), using SciPy's Student-t quantile [4]. All three intervals lie above zero. They estimate mean savings conditional on this trained policy; they are neither simultaneous intervals nor ranges for individual-trip savings. Training-seed variation is assessed separately below.
 
-## 5. Analytical optimality reference, policy, and trace
+Evidence: [four-strategy means](results/mean_cost_comparison.csv), [paired savings and intervals](results/paired_savings_95ci.csv), and [all 10,000 paired purchase costs](results/paired_purchase_costs.csv). Monetary summaries are rounded to cents only after calculations from full-precision values; saved artifacts retain their precision.
 
-Backward induction uses the known simulator: V*(0,p)=p and V*(t,p)=min[p, sum P(p'|t,p)V*(t−1,p')]. A fixed policy chooses its action instead of taking the minimum. Average over the five uniform starting prices. These are full-model analytical expectations to floating-point precision, distinct from the finite test sample.
+## 4. Exact model expectations
+
+Backward induction uses V*(0,p) = p and V*(t,p) = min[p, sum P(p′|t,p)V*(t−1,p′)]. Fixed-policy evaluation follows the chosen action instead of minimizing. Averaging over the five uniform starting fares gives full-model expectations, distinct from sampled means and estimated Q-values.
 
 | Analytical reference | Expected cost |
 | --- | --- |
@@ -85,11 +63,13 @@ Backward induction uses the known simulator: V*(0,p)=p and V*(t,p)=min[p, sum P(
 | Original learned policy | $215.709120 |
 | Learned minus optimal | $8.434896 |
 
-The original policy is suboptimal despite beating the simple rules in the sampled experiment. For example, at (6, $180) it BOOKs while the exact optimal action is WAIT. Its sampled $214.854 cost differs from its analytical $215.709120 expectation because only 10,000 test trips were sampled; Q-values themselves are estimates, not exact policy costs.
+The original policy beats the simple rules in the sample but remains suboptimal. At (6, $180), for example, it BOOKs while the optimal action is WAIT. Its sampled mean of $214.85 differs from its exact expectation of $215.709120 because the test sample is finite. See [exact policy costs](results/exact_mdp_comparison.csv) and [all state values](results/exact_state_values.csv).
 
-![Figure 1. Original greedy BOOK/WAIT policy. Price columns and time rows are labeled; time 0 is mandatory BOOK.](results/policy_heatmap.png)
+## 5. Original learned policy and complete decision trace
 
-The complete original trace below is trajectory index 1, selected as the first test example with at least three decisions. It is an illustration, not a performance estimator; unseen post-purchase prices are not displayed.
+![Figure 1. Original greedy policy: BOOK or WAIT at each state. Time 0 is mandatory BOOK.](results/policy_heatmap.png)
+
+The trace is trajectory index 1, the first test example with at least three decisions. It shows every observed decision through purchase; unseen post-purchase prices are excluded.
 
 | Day | Time remaining | Price | Action | Reward |
 | --- | --- | --- | --- | --- |
@@ -101,118 +81,69 @@ The complete original trace below is trajectory index 1, selected as the first t
 | 6 | 1 | $360 | WAIT | 0 |
 | 7 | 0 | $360 | BOOK | -360 |
 
-This episode ended after seven decisions with a final purchase of $360. Average savings are compatible with expensive individual trips.
+The episode ends after 7 decisions with a $360 purchase. It illustrates policy behavior, not average performance: positive mean savings can coexist with expensive trips. Evidence: [complete trace](results/q_learning_trace.csv) and [all policy actions](results/learned_policy_actions.csv).
 
-## 6. Executed verification and execution readiness
+## 6. Executed verification
 
-| Executed core check | Cases | Outcome |
+| Core check | Cases | Outcome |
 | --- | --- | --- |
 | simulator transitions | 90 | PASS |
 | episode rules | 7 | PASS |
 | Q-value updates | 2 | PASS |
-| exact MDP reference | 18225 | PASS |
+| exact MDP reference | 18,225 | PASS |
 | policy actions | 5 | PASS |
 | paired intervals | 2 | PASS |
 | future-price isolation | 400 | PASS |
 
-The reference expectation was independently verified by enumerating 3,645 latent-move paths per policy for five policies (18,225 comparisons). Supplementary checks also executed nonzero-old-value Q updates, 20 deadline-selector cases, 71 all-state/invalid-action cases, tie-aware action penalties, and preservation of the original model. A differing action is not an error if both exact action costs are equally optimal within numerical tolerance. No algorithm correction was required.
+The exact reference was independently checked by enumerating 3,645 latent-move paths for each of five policies (18,225 comparisons). Supplementary checks passed for nonzero-old-value Q updates, deadline selection, all-state rewards and invalid actions, tie-aware penalties, independent training, and preservation of the original model. Equal-cost optimal actions are treated as ties.
 
-Learning-dynamics instrumentation checked pre-update pair counts, exactly one increment, actual alpha application, terminal/legal targets, independent training state, and read-only checkpoints. All 300 checkpoints preserved Q, counts, and training RNG state. Constant alpha 0.1 reproduced all ten earlier 50,000/200,000 endpoint Q-tables, visit counts, and analytical costs exactly. These are executed finite checks, not proofs of all software behavior or convergence.
+Instrumentation verified update counters, applied learning rates, terminal/legal targets, and checkpoint isolation. All 300 checkpoints preserved Q, counts, and training RNG state. Constant alpha 0.1 exactly reproduced the ten earlier 50,000/200,000 endpoint Q-tables, visit counts, and analytical costs. The saved main Notebook has 80 successfully executed code cells. These finite checks support implementation behavior; they do not prove convergence.
 
-The saved fresh-kernel Notebook has 80 successfully executed code cells. Its recorded interval from the first cell's busy timestamp to the final cell's idle timestamp is 182.36 seconds, excluding kernel startup and runner postchecks. Complete CLI wall time was not instrumented. Packaging reused this successful run; no training was rerun for the report or ZIP. A necessary runner portability correction now ignores machine-specific execution metadata and figure bytes when checking numerical fingerprints. Fixtures confirmed relocation is accepted and changed costs are detected.
+Complete executed records: [core checks](results/verification_results.csv), [supplementary checks](results/supplementary_verification.csv), and [learning-dynamics checks](results/learning_dynamics_verification.csv).
 
-## 7. Supplementary five-seed/two-budget investigation
+## 7. Supplementary training-budget experiment
 
-The prespecified seeds were 66401, 66411, 66421, 66431, and 66441. Each restarted from zero at 50,000 and 200,000 episodes: ten runs, changing only episode budget. Simulator, alpha 0.1, gamma 1, initialization, and the original epsilon schedule stayed fixed. Each final greedy policy was evaluated analytically under the same uniform initial distribution.
-
-| Seed | Episodes | Exact policy cost | Gap above optimal |
-| --- | --- | --- | --- |
-| 66401 | 50,000 | $215.709120 | $8.434896 |
-| 66401 | 200,000 | $219.965568 | $12.691344 |
-| 66411 | 50,000 | $219.965568 | $12.691344 |
-| 66411 | 200,000 | $221.913600 | $14.639376 |
-| 66421 | 50,000 | $217.266816 | $9.992592 |
-| 66421 | 200,000 | $221.913600 | $14.639376 |
-| 66431 | 50,000 | $215.453952 | $8.179728 |
-| 66431 | 200,000 | $219.522432 | $12.248208 |
-| 66441 | 50,000 | $215.933952 | $8.659728 |
-| 66441 | 200,000 | $221.577600 | $14.303376 |
+Seeds 66401, 66411, 66421, 66431, and 66441 each restarted from zero at 50,000 and 200,000 episodes (ten runs). Only episode budget changed: simulator, alpha 0.1, gamma 1, initialization, and the original epsilon schedule stayed fixed. Final greedy policies were evaluated exactly under the uniform initial-fare distribution.
 
 | Episodes | Mean exact cost | Across-seed cost range |
 | --- | --- | --- |
-| 50,000 | $216.865882 | [$215.453952, $219.965568] |
-| 200,000 | $220.978560 | [$219.522432, $221.913600] |
+| 50,000 | $216.87 | [$215.45, $219.97] |
+| 200,000 | $220.98 | [$219.52, $221.91] |
 
-All five seeds worsened at 200,000 episodes; for seed 66401 the exact cost increased by $4.256448. All ten models were below the immediate and $120 baselines' exact costs; seven were below the $180 baseline. Two budgets do not establish a continuous trend. Across-seed ranges are descriptive observations over five selected seeds, not the original paired confidence intervals.
+All five seeds worsened at 200,000 episodes; seed 66401 increased by $4.26. All ten models cost less than the immediate and $120 baselines in exact evaluation; seven cost less than the $180 baseline. The original policy had seven strictly suboptimal states, although all 65 legal pairs were visited and none of those states met the descriptive lower-quartile coverage flag. Coverage alone does not explain the optimality gap.
 
-The original model had seven strictly suboptimal states. At (6, $180), BOOK/WAIT had 5,469/4,490 visits, and BOOK's exact action penalty with optimal continuation was $16.2168. None of the seven met the descriptive lower-quartile coverage flag (cutoff 326 visits); all 65 legal pairs had been visited. This evidence does not identify the cause of the $8.434896 total gap or establish a causal role for experience coverage.
+Full evidence: [all ten runs](results/supplementary_training_runs.csv), [paired budget changes](results/supplementary_paired_gap_changes.csv), [coverage diagnostics](results/supplementary_suboptimal_states.csv), and the [executed Notebook](CS664_Flight_Booking.ipynb).
 
-## 8. Supplementary learning dynamics and rate comparison
+## 8. Supplementary learning-rate experiment
 
-To investigate the deterioration without presuming its cause, each of the same five seeds restarted independently for 200,000 episodes under three conditions: constant alpha 0.1; constant alpha 0.03; and alpha(s,a)=0.1/(1+N_previous(s,a)/1000). The counter is this pair's number of updates before the current update, not global episode count. Rates at 0, 1,000, and 3,000 prior updates are 0.1, 0.05, and 0.025. Scale 1,000 was chosen before the experiment, not optimized.
+The same five seeds independently restarted for 200,000 episodes under three prespecified conditions: constant alpha 0.1; constant alpha 0.03; and alpha(s,a) = 0.1/(1 + N_previous(s,a)/1000). N_previous counts updates to that pair before the current update. At 0, 1,000, and 3,000 prior updates, alpha is 0.1, 0.05, and 0.025. Scale 1,000 was chosen before the experiment. All other settings and the legal greedy evaluator stayed fixed.
 
-All other settings and the legal greedy evaluator were unchanged. Fifteen instrumented runs recorded 300 checkpoints and 2,100 records for the seven originally suboptimal states, including Q margins, actions, visits, and next-update rates. Changed policies can change subsequent random experience and RNG consumption, so equal seeds across conditions do not guarantee identical training trajectories. All runs, including equal-cost policies, are retained.
+Fifteen runs recorded 300 checkpoints and 2,100 diagnostics for the seven originally suboptimal states. Equal seeds do not ensure identical experience across conditions: changed policies can alter later transitions and RNG consumption. Every run, including equal-cost policies, remains in the evidence.
 
-| Seed | Rate condition | Final exact cost | Gap above optimal |
+| Condition | Mean exact cost | Across-seed cost range | Mean optimality gap |
 | --- | --- | --- | --- |
-| 66401 | Constant 0.1 | $219.965568 | $12.691344 |
-| 66401 | Constant 0.03 | $209.959872 | $2.685648 |
-| 66401 | Visit decay | $209.670624 | $2.396400 |
-| 66411 | Constant 0.1 | $221.913600 | $14.639376 |
-| 66411 | Constant 0.03 | $212.737440 | $5.463216 |
-| 66411 | Visit decay | $207.930624 | $0.656400 |
-| 66421 | Constant 0.1 | $221.913600 | $14.639376 |
-| 66421 | Constant 0.03 | $212.284032 | $5.009808 |
-| 66421 | Visit decay | $208.882224 | $1.608000 |
-| 66431 | Constant 0.1 | $219.522432 | $12.248208 |
-| 66431 | Constant 0.03 | $215.709120 | $8.434896 |
-| 66431 | Visit decay | $209.670624 | $2.396400 |
-| 66441 | Constant 0.1 | $221.577600 | $14.303376 |
-| 66441 | Constant 0.03 | $215.933952 | $8.659728 |
-| 66441 | Visit decay | $209.670624 | $2.396400 |
+| Constant 0.1 | $220.98 | [$219.52, $221.91] | $13.70 |
+| Constant 0.03 | $213.32 | [$209.96, $215.93] | $6.05 |
+| Visit decay | $209.16 | [$207.93, $209.67] | $1.89 |
 
-| Condition | Mean exact cost | Across-seed cost range |
-| --- | --- | --- |
-| Constant 0.1 | $220.978560 | [$219.522432, $221.913600] |
-| Constant 0.03 | $213.324883 | [$209.959872, $215.933952] |
-| Visit decay | $209.164944 | [$207.930624, $209.670624] |
+Both alternatives lowered every seed's final exact cost relative to alpha 0.1. For seed 66401, reductions were $10.01 with alpha 0.03 and $10.29 with visit decay. Every final policy still had a positive optimality gap. Checkpoint costs fluctuated in all conditions; action switches accompanied performance changes, but sparse checkpoints do not isolate their cause. No best-checkpoint selection was performed.
 
-Both alternatives lowered every seed's final cost relative to alpha 0.1. For seed 66401, reductions were $10.005696 (0.03) and $10.294944 (decay). Across five seeds, the mean gap was $13.704336, $6.050659, and $1.890720, respectively. Every final policy still had a positive gap. These are exploratory rate-sensitivity findings, not independent confirmation or replacements for the original four-strategy experiment.
+Complete evidence: [all fifteen final runs](results/learning_dynamics_final_comparison.csv), [paired rate comparisons](results/learning_dynamics_paired_comparisons.csv), [all checkpoints](results/learning_dynamics_checkpoints.csv), [state diagnostics](results/learning_dynamics_tracked_states.csv), and the [saved dynamics figure](results/learning_dynamics_checkpoint_gaps.png). Methods and outputs are also in the [main Notebook](CS664_Flight_Booking.ipynb).
 
-| Condition | Improving intervals | Worsening intervals | Unchanged |
-| --- | --- | --- | --- |
-| Constant 0.1 | 39 | 48 | 8 |
-| Constant 0.03 | 46 | 40 | 9 |
-| Visit decay | 36 | 26 | 33 |
+## 9. Limitations
 
-All conditions fluctuated. For seed 66401 under alpha 0.1, cost rose $4.719312 between 20,000 and 30,000 episodes while four tracked states switched WAIT to BOOK. At final (6, $180), WAIT was chosen by 0/5, 2/5, and 5/5 policies across the three conditions. These switches accompany performance changes; other states can change too. Sparse checkpoints omit intervening changes and do not identify a unique causal mechanism.
+The model uses hypothetical probabilities, five fare levels, a short horizon, and no sold-out events; it provides no evidence of real-flight savings. Paired intervals quantify test-path uncertainty for one policy, not training uncertainty or individual-trip outcomes. Across-seed ranges describe five selected seeds, not confidence intervals; two budgets do not establish a continuous trend. Supplementary analyses are exploratory, not independent confirmation, and do not establish universal robustness or convergence. Fixed-step target variability, decay, learning speed, and coverage may matter, but their causal contributions were not isolated. No simultaneous inference or additional tuning is claimed.
 
-![Figure 2. Report-layout rendering of the saved 300 checkpoints, all five seeds per condition and consistent axes. Lines join recorded checkpoints only. No new training or experiment was performed for this figure.](report_assets/learning_dynamics_report.png)
+## 10. Reproducibility and references
 
-## 9. Limitations and answers to the validation questions
+Follow [README setup and execution instructions](README.md) for the pinned environment, project interpreter, Notebook kernel, and fresh-kernel runner. [RESULTS.md](RESULTS.md) indexes the complete saved outputs. Full per-seed results and full-precision artifacts are retained; this report revision uses saved evidence without rerunning experiments.
 
-1. Cost reduction: the original single-seed policy had the lowest sampled mean among the four rules and positive paired mean savings with intervals above zero. This does not guarantee saving on a particular trip or on real fares.
+[1] Kalathur, S. (2026). CS664 Term Project. Instructor-provided metcs664_TermProject.pdf; official project requirements.
 
-2. Reliability: original CIs concern test-trajectory uncertainty conditional on one trained policy. Supplementary ranges expose training-seed variation. Rate alternatives improved these five final policies, but the analysis is exploratory and five seeds do not establish universal robustness. No simultaneous inference across all comparisons is claimed.
+[2] [Original project proposal](CS664_Project_Wong_Sheung_Wan_Proposal.md); [executed Notebook](CS664_Flight_Booking.ipynb). Numerical audit: [report_number_audit.json](report_assets/report_number_audit.json).
 
-3. Optimality and correctness: the original analytical gap is $8.434896; smaller supplementary gaps show sensitivity to tested learning-rate settings. Executed tests support the specified implementation and unperturbed instrumentation. They do not prove convergence or explain the full remaining mechanism. Neither alpha 0.03 nor the visit-decay rule is established as optimal; no additional tuning or best-checkpoint selection was performed.
+[3] Watkins, C. J. C. H., & Dayan, P. (1992). Q-learning. Machine Learning, 8, 279–292. [Publisher reference](https://doi.org/10.1007/BF00992698). Algorithm background; no convergence theorem is claimed for this experiment.
 
-The underlying probabilities, five fare levels, short horizon, and absence of sold-out events are hypothetical. Fixed-step updates can retain sensitivity to sampled targets; decay can alter learning speed and coverage, but the relative contribution of such mechanisms was not isolated. There is no evidence here of real-flight savings. The completed project demonstrates a reproducible reinforcement-learning application and its limits rather than a validated travel recommendation.
+[4] SciPy contributors. [scipy.stats.t documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html). Student-t quantile; consulted October 14, 2026.
 
-## 10. Reproducibility
-
-The ZIP provides the executed main Notebook, runner and numerical-verification module, pinned runtime requirements, README, unchanged English proposal, RESULTS.md, and all official result artifacts. README identifies the project virtual-environment interpreter and Python (CS664 Flight Booking) kernel. Report files and recording are separate uploads. Packaging excluded practice work, credentials, environments, caches, Git, local tools, and instructor materials.
-
-## References and evidence sources
-
-[1] Kalathur, S. (2026). CS664 Term Project. Instructor-provided metcs664_TermProject.pdf. Used for the official deliverables and demo requirements; excluded from the ZIP.
-
-[2] CS664_Project_Wong_Sheung_Wan_Proposal.md. Original supplied English implementation plan, unchanged. CS664_Flight_Booking.ipynb, RESULTS.md, and results/ supply the executed numerical evidence; report_assets/report_number_audit.json maps validation to those artifacts.
-
-[3] Watkins, C. J. C. H., & Dayan, P. (1992). Q-learning. Machine Learning, 8, 279–292. https://doi.org/10.1007/BF00992698. Publisher abstract and bibliographic page consulted for algorithm background; not a claim that this finite project satisfies a convergence theorem.
-
-[4] SciPy contributors. scipy.stats.t API documentation. https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html. Consulted October 14, 2026 for the Student-t quantile used in paired intervals.
-
-[5] NumPy contributors. Random Generator documentation. https://numpy.org/doc/stable/reference/random/generator.html. Consulted October 14, 2026 for seeded random-generator behavior.
-
-External references were consulted to validate method explanations while drafting, not used as flight-price data. This remains a draft awaiting student review.
+[5] NumPy contributors. [Random Generator documentation](https://numpy.org/doc/stable/reference/random/generator.html). Seeded random streams; consulted October 14, 2026.

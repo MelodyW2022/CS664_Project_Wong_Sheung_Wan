@@ -32,7 +32,7 @@ def rows(name):
         return list(csv.DictReader(file))
 
 
-def money(value, places=6):
+def money(value, places=2):
     return f"${float(value):,.{places}f}"
 
 
@@ -47,6 +47,30 @@ def audit_saved_evidence():
     assert [cell.execution_count for cell in code] == list(range(1, 81))
     assert not any(output.output_type == "error" for cell in code for output in cell.outputs)
     summary = json.loads((RESULTS / "run_summary.json").read_text())
+    assert {k: summary[k] for k in (
+        'training_seed', 'test_seed', 'training_episodes', 'test_trajectories',
+        'alpha', 'gamma', 'epsilon_start', 'epsilon_end', 'epsilon_decay_episodes',
+        'evaluation_exploration', 'official_threshold')} == dict(
+        training_seed=66401, test_seed=66402, training_episodes=50000,
+        test_trajectories=10000, alpha=.1, gamma=1., epsilon_start=1.,
+        epsilon_end=.05, epsilon_decay_episodes=40000, evaluation_exploration=0,
+        official_threshold=180)
+    assumptions = json.loads((RESULTS / 'simulation_assumptions.json').read_text())
+    assert assumptions == summary['simulation_assumptions']
+    assert assumptions['price_levels'] == [120, 180, 240, 300, 360]
+    assert assumptions['time_remaining'] == list(range(6, -1, -1))
+    assert assumptions['early_wait_times'] == [6, 5, 4, 3]
+    assert assumptions['late_wait_times'] == [2, 1]
+    assert assumptions['early_probabilities'] == [.3, .3, .4]
+    assert assumptions['late_probabilities'] == [.6, .2, .2]
+    budget_config = json.loads((RESULTS / 'supplementary_experiment_config.json').read_text())
+    dynamics_config = json.loads((RESULTS / 'learning_dynamics_config.json').read_text())
+    assert budget_config['training_seeds'] == dynamics_config['seeds'] == [66401, 66411, 66421, 66431, 66441]
+    assert budget_config['episode_budgets'] == [50000, 200000]
+    assert budget_config['alpha'] == .1 and budget_config['gamma'] == 1
+    assert dynamics_config['episodes_per_run'] == 200000 and dynamics_config['instrumented_runs'] == 15
+    assert dynamics_config['decay_scale'] == 1000
+    assert [.1 / (1 + n / 1000) for n in [0, 1000, 3000]] == [.1, .05, .025]
     paired = rows("paired_purchase_costs.csv")
     assert len(paired) == 10_000
     q = np.array([int(row["Q-learning (greedy)"]) for row in paired])
@@ -92,7 +116,13 @@ def audit_saved_evidence():
         values = [float(r["exact_expected_cost"]) for r in finals if r["condition"] == row["condition"]]
         assert np.isclose(float(row["mean_exact_cost"]), np.mean(values))
         assert float(row["min_exact_cost"]) == min(values) and float(row["max_exact_cost"]) == max(values)
+        assert np.isclose(float(row['mean_gap']), np.mean(values) - exact['optimal_expected_cost'])
     assert all(float(row["gap_from_optimal"]) > 0 for row in finals)
+    baselines = rows('supplementary_baseline_comparisons.csv')
+    for baseline, count in [('Immediate booking', 10), ('Minimum-price rule ($120)', 10),
+                            ('Fixed-threshold rule ($180)', 7)]:
+        selected = [r for r in baselines if r['baseline'] == baseline]
+        assert sum(float(r['learned_exact_cost']) < float(r['baseline_exact_cost']) for r in selected) == count
     # Audit numerical examples stated in prose as well as the generated tables.
     suboptimal = rows("supplementary_suboptimal_states.csv")
     assert len(suboptimal) == 7
@@ -166,95 +196,83 @@ def make_report_figure():
     return target
 
 
-def report_blocks(summary, runtime, graph):
+def report_blocks(summary, runtime=None, graph=None):
+    """Concise report from saved evidence; full run listings remain in results/."""
     blocks = []
     def title(text): blocks.append(("title", text))
     def h(text): blocks.append(("heading", text))
     def p(text): blocks.append(("paragraph", text))
     def table(headers, data, widths=None): blocks.append(("table", (headers, data, widths)))
-    def figure(path, caption, width, height): blocks.append(("figure", (str(path), caption, width, height)))
+    def page(): blocks.append(("pagebreak", None))
     exact = summary["exact_mdp"]
     title("Flight Booking Decision Assistant")
     p("CS664 Term Project | Prepared for Sheung Wan Wong | October 14, 2026")
-    p("DRAFT — awaiting student review. This report records executed computational work; it does not establish personal practice, presentation readiness, or submission.")
-    h("1. Goal, classification, and scope")
-    p("This machine learning application uses Python tabular Q-learning to choose BOOK or WAIT for a simulated traveler with a fixed departure date. Its goal is to investigate whether current fare and time remaining reduce expected purchase cost relative to simple booking rules. It is a small teaching model, not a real-airfare forecasting service.")
-    p("The original English proposal planned a seven-opportunity simulator, 50,000 training episodes, a four-strategy comparison on 10,000 fresh shared price paths, paired uncertainty estimates, an exact MDP reference, a policy heatmap, a trace, and program checks. That scope was completed without revising the proposal or changing the simulator or four strategies. Later exploratory extensions investigated five seeds at two training budgets and three prespecified learning-rate conditions. These extensions remain separate from the original policy and its sampled comparison.")
-    p("The three validation questions are: (1) Does Q-learning reduce cost versus the baselines? (2) How reliable are the observed savings? (3) How close is the learned policy to optimal, and does the implementation follow the rules? The instructor's CS664 Term Project PDF supplies the official requirements; the proposal is the implementation plan [1, 2].")
-    h("2. Simulator and decision process")
-    p("State is (time remaining, current price). Seven daily purchase opportunities run from time 6 to time 0, with prices $120, $180, $240, $300, and $360. The initial price is uniform over these five levels. This is an artificial teaching horizon, not a recommended real-world booking window.")
-    table(["Time before WAIT", "+$60", "Unchanged", "-$60"], [["6–3", "30%", "30%", "40%"], ["2–1", "60%", "20%", "20%"]])
-    p("WAIT gives reward 0, reduces time by one, and samples the next price using the regime before the action. An attempted move outside $120–$360 stays at the boundary. BOOK pays the current fare, gives reward equal to its negative, and terminates. At time 0 only BOOK is legal; a requested WAIT is converted to BOOK. Further steps after purchase raise an error until reset. There are no refunds, cancellations, or sold-out events. Probabilities are hypothetical, not measured flight-price patterns.")
-    h("3. Q-learning method and key code")
-    p("Q-learning updates state/action values from observed rewards and next states [3]. The agent does not receive the transition-probability table. Maximizing the undiscounted negative purchase reward minimizes eventual cost. The Q-table starts at zero with shape 7 × 5 × 2; 65 state/action pairs are legal because deadline WAIT is excluded. Greedy ties choose BOOK.")
-    table(["Original setting", "Value"], [["Training episodes", f"{summary['training_episodes']:,}"],
-          ["Learning rate / gamma", "0.1 / 1.0"], ["Training / test seeds", f"{summary['training_seed']} / {summary['test_seed']}"],
-          ["Exploration", "Epsilon 1.0 on episode 1 to 0.05 on episode 40,000; hold 0.05 afterward"],
-          ["Evaluation", "Greedy actions, epsilon 0, no Q updates"]], [2.0, 5.2])
-    p("The update is Q_new = Q_old + alpha × (target − Q_old). For terminal BOOK, target = reward only. Otherwise target = reward + gamma × the largest legal next-state Q-value. At a deadline next state, only BOOK enters the bootstrap target.")
-    table(["Actual logged update", "Observed value"], [["Episode / state / action", "1 / (6, $120) / BOOK"],
-          ["Old value", str(summary['first_update']['old'])], ["Reward / terminal target", "-120 / -120"],
-          ["Alpha", str(summary['first_update']['learning_rate'])], ["Updated value", str(summary['first_update']['updated'])]], [2.6, 4.6])
-    p("Thus 0 + 0.1 × (-120 − 0) = -12. An actual WAIT update at episode 376, state (1, $240), had old value 0, reward 0, target -30, and updated value -3. With gamma 1, its best legal future estimate at that training moment was -30; this is not the final Q-table's exact expected cost.")
-    table(["Key code", "Purpose"], [["next_price; FlightBookingEnv.step", "Probability regimes, clipping, rewards, forced deadline purchase, and termination"],
-          ["update_q; choose_training_action", "Terminal/nonterminal targets, epsilon-greedy exploration, and legal greedy actions"],
-          ["train_q_learning; play_path", "Independent episode training and stop-at-purchase state-only evaluation"],
-          ["solve_optimal_mdp; exact_policy_values", "Backward induction and fixed-policy analytical expectations"]], [2.5, 4.7])
-    h("4. Original sampled four-strategy evaluation")
-    p("All strategies were evaluated on the same 10,000 new seven-price trajectories, generated with test seed 66402, separate from original training seed 66401. Pre-generation belongs to the evaluator: every decision function receives only its current state, never future prices. Evaluation stops at purchase, forces deadline booking, uses no exploration, and leaves Q unchanged. NumPy's seeded Generator supports reproducible random streams [5].")
-    table(["Strategy", "Rule", "Sample mean cost"], [[r['strategy'], rule, money(r['mean_purchase_cost'], 3)] for r, rule in
-          zip(rows('mean_cost_comparison.csv'), ["BOOK first day", "BOOK at $120; else deadline", "BOOK at $180 or below; else deadline", "Original 50,000-episode greedy policy"])], [2.0, 3.7, 1.5])
-    p("The $180 baseline was chosen from analytical model knowledge in the original proposal, not by searching the test trajectories. The original Q-learning policy is retained; improved supplementary models do not replace it.")
-    table(["Baseline", "Mean paired saving", "Individual paired 95% CI"], [[r['baseline'], money(r['mean_paired_saving'], 3),
-          f"[{money(r['ci_95_lower'])}, {money(r['ci_95_upper'])}]" ] for r in rows('paired_savings_95ci.csv')], [2.4, 1.7, 3.1])
-    p("Saving is baseline cost minus Q-learning cost on the same trajectory. The interval is mean(d) ± t(0.975, 9999) × sample_sd(d)/sqrt(10000), using SciPy's Student-t quantile [4]. All three intervals are above zero for this fixed policy and sample. They are large-sample approximations for mean savings, not ranges containing 95% of individual-trip savings; they are not simultaneous intervals and do not measure variability across training seeds.")
-    h("5. Analytical optimality reference, policy, and trace")
-    p("Backward induction uses the known simulator: V*(0,p)=p and V*(t,p)=min[p, sum P(p'|t,p)V*(t−1,p')]. A fixed policy chooses its action instead of taking the minimum. Average over the five uniform starting prices. These are full-model analytical expectations to floating-point precision, distinct from the finite test sample.")
-    table(["Analytical reference", "Expected cost"], [["Optimal finite-horizon policy", money(exact['optimal_expected_cost'])],
-          ["Original learned policy", money(exact['learned_policy_expected_cost'])], ["Learned minus optimal", money(exact['gap_above_optimal'])]])
-    p("The original policy is suboptimal despite beating the simple rules in the sampled experiment. For example, at (6, $180) it BOOKs while the exact optimal action is WAIT. Its sampled $214.854 cost differs from its analytical $215.709120 expectation because only 10,000 test trips were sampled; Q-values themselves are estimates, not exact policy costs.")
-    figure(RESULTS / 'policy_heatmap.png', "Figure 1. Original greedy BOOK/WAIT policy. Price columns and time rows are labeled; time 0 is mandatory BOOK.", 6.4, 4.8)
-    p("The complete original trace below is trajectory index 1, selected as the first test example with at least three decisions. It is an illustration, not a performance estimator; unseen post-purchase prices are not displayed.")
+    p("DRAFT — awaiting student review.")
+    h("1. Project goal and simulator")
+    p("This Python tabular Q-learning application chooses BOOK or WAIT for a simulated traveler with a fixed departure date. It tests whether current fare and time remaining can reduce expected purchase cost relative to simple booking rules. The proposal specified a seven-opportunity simulator, 50,000 training episodes, four strategies on 10,000 shared test paths, paired uncertainty estimates, an exact MDP reference, a policy heatmap, a decision trace, and verification [1, 2]. Supplementary experiments examine training budget and learning rate separately from the original comparison.")
+    p("State is (time remaining, current price). Seven daily purchase opportunities run from time 6 to 0; fares are $120, $180, $240, $300, and $360. The starting fare is uniform over these five levels. WAIT uses the probability regime for the time before the action:")
+    table(["Time before WAIT", "+$60", "Unchanged", "−$60"], [["6–3", "30%", "30%", "40%"], ["2–1", "60%", "20%", "20%"]])
+    p("WAIT gives reward 0 and reduces time by one. Moves beyond $120–$360 stay at the boundary. BOOK gives the negative current fare as reward and terminates. At time 0, BOOK is mandatory and a requested WAIT becomes BOOK. Actions after purchase raise an error until reset. Refunds, cancellations, and sold-out events are excluded. All probabilities are hypothetical.")
+    h("2. Training and an observed Q-value update")
+    p("The agent learns from observed transitions without receiving their probability table [3]. Maximizing undiscounted negative purchase reward minimizes cost. Its zero-initialized Q-table has shape 7 × 5 × 2, with 65 legal state/action pairs; deadline WAIT is excluded and greedy ties choose BOOK.")
+    table(["Original setting", "Value"], [["Episodes / learning rate / gamma", "50,000 / 0.1 / 1.0"], ["Training / test seeds", "66401 / 66402"], ["Epsilon schedule", "1.0 on episode 1 to 0.05 on episode 40,000; then 0.05"], ["Evaluation", "Greedy; epsilon 0; no Q updates"]], [2.5, 4.7])
+    p("Q_new = Q_old + alpha × (target − Q_old). Terminal BOOK uses target = reward; otherwise target = reward + gamma × max Q(next state, legal action). Only BOOK is legal in a deadline next state.")
+    u = summary['first_update']
+    p(f"Actual logged example: episode {u['episode']}, state ({u['state'][0]}, ${u['state'][1]}), {u['action']}. Old Q = {u['old']:g}, reward and terminal target = {u['target']:g}, alpha = {u['learning_rate']:g}. Thus Q_new = 0 + 0.1 × (−120 − 0) = {u['updated']:g}. The saved update is in [run_summary.json](results/run_summary.json).")
+    page()
+    h("3. Original sampled four-strategy comparison")
+    p("All four strategies used the same 10,000 fresh seven-price paths, generated with test seed 66402 independently of training seed 66401 [5]. Only the evaluator sees complete paths: each policy receives its current state, stops at purchase, and must book at the deadline. Evaluation has no exploration or Q updates. The $180 threshold was specified from analytical model knowledge in the proposal, without searching the test paths.")
+    table(["Strategy", "Rule", "Sample mean cost"], [[r['strategy'], rule, money(r['mean_purchase_cost'])] for r, rule in zip(rows('mean_cost_comparison.csv'), ["BOOK first day", "BOOK at $120; else deadline", "BOOK at $180 or below; else deadline", "Original greedy policy"])], [2.3, 3.4, 1.5])
+    table(["Baseline", "Mean paired saving", "Individual paired 95% CI"], [[r['baseline'], money(r['mean_paired_saving']), f"[{money(r['ci_95_lower'])}, {money(r['ci_95_upper'])}]" ] for r in rows('paired_savings_95ci.csv')], [2.7, 1.7, 2.8])
+    p("Saving is baseline cost minus Q-learning cost on the same path. Each interval is mean(d) ± t(0.975, 9999) × sample_sd(d)/sqrt(10000), using SciPy's Student-t quantile [4]. All three intervals lie above zero. They estimate mean savings conditional on this trained policy; they are neither simultaneous intervals nor ranges for individual-trip savings. Training-seed variation is assessed separately below.")
+    p("Evidence: [four-strategy means](results/mean_cost_comparison.csv), [paired savings and intervals](results/paired_savings_95ci.csv), and [all 10,000 paired purchase costs](results/paired_purchase_costs.csv). Monetary summaries are rounded to cents only after calculations from full-precision values; saved artifacts retain their precision.")
+    h("4. Exact model expectations")
+    p("Backward induction uses V*(0,p) = p and V*(t,p) = min[p, sum P(p′|t,p)V*(t−1,p′)]. Fixed-policy evaluation follows the chosen action instead of minimizing. Averaging over the five uniform starting fares gives full-model expectations, distinct from sampled means and estimated Q-values.")
+    table(["Analytical reference", "Expected cost"], [["Optimal finite-horizon policy", money(exact['optimal_expected_cost'], 6)], ["Original learned policy", money(exact['learned_policy_expected_cost'], 6)], ["Learned minus optimal", money(exact['learned_policy_expected_cost'] - exact['optimal_expected_cost'], 6)]], [4.5, 2.7])
+    p("The original policy beats the simple rules in the sample but remains suboptimal. At (6, $180), for example, it BOOKs while the optimal action is WAIT. Its sampled mean of $214.85 differs from its exact expectation of $215.709120 because the test sample is finite. See [exact policy costs](results/exact_mdp_comparison.csv) and [all state values](results/exact_state_values.csv).")
+    page()
+    h("5. Original learned policy and complete decision trace")
+    blocks.append(("figure", (str(RESULTS / 'policy_heatmap.png'), "Figure 1. Original greedy policy: BOOK or WAIT at each state. Time 0 is mandatory BOOK.", 6.4, 4.8)))
+    p("The trace is trajectory index 1, the first test example with at least three decisions. It shows every observed decision through purchase; unseen post-purchase prices are excluded.")
     table(["Day", "Time remaining", "Price", "Action", "Reward"], [[r['day'], r['time_remaining'], money(r['price'], 0), r['action'], r['reward']] for r in rows('q_learning_trace.csv')])
-    p(f"This episode ended after seven decisions with a final purchase of {money(summary['final_purchase_cost'], 0)}. Average savings are compatible with expensive individual trips.")
-    h("6. Executed verification and execution readiness")
-    table(["Executed core check", "Cases", "Outcome"], [[r['check'], r['cases'], r['status']] for r in rows('verification_results.csv')], [4.8, 1.0, 1.4])
-    p("The reference expectation was independently verified by enumerating 3,645 latent-move paths per policy for five policies (18,225 comparisons). Supplementary checks also executed nonzero-old-value Q updates, 20 deadline-selector cases, 71 all-state/invalid-action cases, tie-aware action penalties, and preservation of the original model. A differing action is not an error if both exact action costs are equally optimal within numerical tolerance. No algorithm correction was required.")
-    p("Learning-dynamics instrumentation checked pre-update pair counts, exactly one increment, actual alpha application, terminal/legal targets, independent training state, and read-only checkpoints. All 300 checkpoints preserved Q, counts, and training RNG state. Constant alpha 0.1 reproduced all ten earlier 50,000/200,000 endpoint Q-tables, visit counts, and analytical costs exactly. These are executed finite checks, not proofs of all software behavior or convergence.")
-    p(f"The saved fresh-kernel Notebook has 80 successfully executed code cells. Its recorded interval from the first cell's busy timestamp to the final cell's idle timestamp is {runtime:.2f} seconds, excluding kernel startup and runner postchecks. Complete CLI wall time was not instrumented. Packaging reused this successful run; no training was rerun for the report or ZIP. A necessary runner portability correction now ignores machine-specific execution metadata and figure bytes when checking numerical fingerprints. Fixtures confirmed relocation is accepted and changed costs are detected.")
-    h("7. Supplementary five-seed/two-budget investigation")
-    p("The prespecified seeds were 66401, 66411, 66421, 66431, and 66441. Each restarted from zero at 50,000 and 200,000 episodes: ten runs, changing only episode budget. Simulator, alpha 0.1, gamma 1, initialization, and the original epsilon schedule stayed fixed. Each final greedy policy was evaluated analytically under the same uniform initial distribution.")
-    table(["Seed", "Episodes", "Exact policy cost", "Gap above optimal"], [[r['training_seed'], f"{int(r['episodes']):,}", money(r['exact_expected_cost']), money(r['gap_from_optimal'])] for r in rows('supplementary_training_runs.csv')])
-    table(["Episodes", "Mean exact cost", "Across-seed cost range"], [[f"{int(r['episodes']):,}", money(r['mean_exact_cost']), f"[{money(r['min_exact_cost'])}, {money(r['max_exact_cost'])}]" ] for r in rows('supplementary_budget_summary.csv')])
-    p("All five seeds worsened at 200,000 episodes; for seed 66401 the exact cost increased by $4.256448. All ten models were below the immediate and $120 baselines' exact costs; seven were below the $180 baseline. Two budgets do not establish a continuous trend. Across-seed ranges are descriptive observations over five selected seeds, not the original paired confidence intervals.")
-    p("The original model had seven strictly suboptimal states. At (6, $180), BOOK/WAIT had 5,469/4,490 visits, and BOOK's exact action penalty with optimal continuation was $16.2168. None of the seven met the descriptive lower-quartile coverage flag (cutoff 326 visits); all 65 legal pairs had been visited. This evidence does not identify the cause of the $8.434896 total gap or establish a causal role for experience coverage.")
-    h("8. Supplementary learning dynamics and rate comparison")
-    p("To investigate the deterioration without presuming its cause, each of the same five seeds restarted independently for 200,000 episodes under three conditions: constant alpha 0.1; constant alpha 0.03; and alpha(s,a)=0.1/(1+N_previous(s,a)/1000). The counter is this pair's number of updates before the current update, not global episode count. Rates at 0, 1,000, and 3,000 prior updates are 0.1, 0.05, and 0.025. Scale 1,000 was chosen before the experiment, not optimized.")
-    p("All other settings and the legal greedy evaluator were unchanged. Fifteen instrumented runs recorded 300 checkpoints and 2,100 records for the seven originally suboptimal states, including Q margins, actions, visits, and next-update rates. Changed policies can change subsequent random experience and RNG consumption, so equal seeds across conditions do not guarantee identical training trajectories. All runs, including equal-cost policies, are retained.")
-    labels={'constant_0.1':'Constant 0.1','constant_0.03':'Constant 0.03','visit_decay':'Visit decay'}
-    table(["Seed", "Rate condition", "Final exact cost", "Gap above optimal"], [[r['training_seed'], labels[r['condition']], money(r['exact_expected_cost']), money(r['gap_from_optimal'])] for r in rows('learning_dynamics_final_comparison.csv')])
-    table(["Condition", "Mean exact cost", "Across-seed cost range"], [[labels[r['condition']], money(r['mean_exact_cost']), f"[{money(r['min_exact_cost'])}, {money(r['max_exact_cost'])}]" ] for r in rows('learning_dynamics_across_seed_summary.csv')], [1.5, 1.8, 3.9])
-    p("Both alternatives lowered every seed's final cost relative to alpha 0.1. For seed 66401, reductions were $10.005696 (0.03) and $10.294944 (decay). Across five seeds, the mean gap was $13.704336, $6.050659, and $1.890720, respectively. Every final policy still had a positive gap. These are exploratory rate-sensitivity findings, not independent confirmation or replacements for the original four-strategy experiment.")
-    table(["Condition", "Improving intervals", "Worsening intervals", "Unchanged"], [[labels[r['condition']], r['improved_intervals'], r['worsened_intervals'], r['unchanged_intervals']] for r in rows('learning_dynamics_change_summary.csv')])
-    p("All conditions fluctuated. For seed 66401 under alpha 0.1, cost rose $4.719312 between 20,000 and 30,000 episodes while four tracked states switched WAIT to BOOK. At final (6, $180), WAIT was chosen by 0/5, 2/5, and 5/5 policies across the three conditions. These switches accompany performance changes; other states can change too. Sparse checkpoints omit intervening changes and do not identify a unique causal mechanism.")
-    blocks.append(("pagebreak", None))
-    figure(graph, "Figure 2. Report-layout rendering of the saved 300 checkpoints, all five seeds per condition and consistent axes. Lines join recorded checkpoints only. No new training or experiment was performed for this figure.", 6.4, 6.85)
-    h("9. Limitations and answers to the validation questions")
-    p("1. Cost reduction: the original single-seed policy had the lowest sampled mean among the four rules and positive paired mean savings with intervals above zero. This does not guarantee saving on a particular trip or on real fares.")
-    p("2. Reliability: original CIs concern test-trajectory uncertainty conditional on one trained policy. Supplementary ranges expose training-seed variation. Rate alternatives improved these five final policies, but the analysis is exploratory and five seeds do not establish universal robustness. No simultaneous inference across all comparisons is claimed.")
-    p("3. Optimality and correctness: the original analytical gap is $8.434896; smaller supplementary gaps show sensitivity to tested learning-rate settings. Executed tests support the specified implementation and unperturbed instrumentation. They do not prove convergence or explain the full remaining mechanism. Neither alpha 0.03 nor the visit-decay rule is established as optimal; no additional tuning or best-checkpoint selection was performed.")
-    p("The underlying probabilities, five fare levels, short horizon, and absence of sold-out events are hypothetical. Fixed-step updates can retain sensitivity to sampled targets; decay can alter learning speed and coverage, but the relative contribution of such mechanisms was not isolated. There is no evidence here of real-flight savings. The completed project demonstrates a reproducible reinforcement-learning application and its limits rather than a validated travel recommendation.")
-    h("10. Reproducibility")
-    p("The ZIP provides the executed main Notebook, runner and numerical-verification module, pinned runtime requirements, README, unchanged English proposal, RESULTS.md, and all official result artifacts. README identifies the project virtual-environment interpreter and Python (CS664 Flight Booking) kernel. Report files and recording are separate uploads. Packaging excluded practice work, credentials, environments, caches, Git, local tools, and instructor materials.")
-    h("References and evidence sources")
+    p(f"The episode ends after {len(rows('q_learning_trace.csv'))} decisions with a {money(summary['final_purchase_cost'], 0)} purchase. It illustrates policy behavior, not average performance: positive mean savings can coexist with expensive trips. Evidence: [complete trace](results/q_learning_trace.csv) and [all policy actions](results/learned_policy_actions.csv).")
+    page()
+    h("6. Executed verification")
+    table(["Core check", "Cases", "Outcome"], [[r['check'], f"{int(r['cases']):,}", r['status']] for r in rows('verification_results.csv')], [4.8, 1.0, 1.4])
+    p("The exact reference was independently checked by enumerating 3,645 latent-move paths for each of five policies (18,225 comparisons). Supplementary checks passed for nonzero-old-value Q updates, deadline selection, all-state rewards and invalid actions, tie-aware penalties, independent training, and preservation of the original model. Equal-cost optimal actions are treated as ties.")
+    p("Instrumentation verified update counters, applied learning rates, terminal/legal targets, and checkpoint isolation. All 300 checkpoints preserved Q, counts, and training RNG state. Constant alpha 0.1 exactly reproduced the ten earlier 50,000/200,000 endpoint Q-tables, visit counts, and analytical costs. The saved main Notebook has 80 successfully executed code cells. These finite checks support implementation behavior; they do not prove convergence.")
+    p("Complete executed records: [core checks](results/verification_results.csv), [supplementary checks](results/supplementary_verification.csv), and [learning-dynamics checks](results/learning_dynamics_verification.csv).")
+    h("7. Supplementary training-budget experiment")
+    p("Seeds 66401, 66411, 66421, 66431, and 66441 each restarted from zero at 50,000 and 200,000 episodes (ten runs). Only episode budget changed: simulator, alpha 0.1, gamma 1, initialization, and the original epsilon schedule stayed fixed. Final greedy policies were evaluated exactly under the uniform initial-fare distribution.")
+    table(["Episodes", "Mean exact cost", "Across-seed cost range"], [[f"{int(r['episodes']):,}", money(r['mean_exact_cost']), f"[{money(r['min_exact_cost'])}, {money(r['max_exact_cost'])}]" ] for r in rows('supplementary_budget_summary.csv')], [1.5, 2.2, 3.5])
+    pairs = rows('supplementary_paired_gap_changes.csv')
+    example = next(r for r in pairs if r['training_seed'] == '66401')
+    increase = float(example['gap_200000']) - float(example['gap_50000'])
+    p(f"All five seeds worsened at 200,000 episodes; seed 66401 increased by {money(increase)}. All ten models cost less than the immediate and $120 baselines in exact evaluation; seven cost less than the $180 baseline. The original policy had seven strictly suboptimal states, although all 65 legal pairs were visited and none of those states met the descriptive lower-quartile coverage flag. Coverage alone does not explain the optimality gap.")
+    p("Full evidence: [all ten runs](results/supplementary_training_runs.csv), [paired budget changes](results/supplementary_paired_gap_changes.csv), [coverage diagnostics](results/supplementary_suboptimal_states.csv), and the [executed Notebook](CS664_Flight_Booking.ipynb).")
+    page()
+    h("8. Supplementary learning-rate experiment")
+    p("The same five seeds independently restarted for 200,000 episodes under three prespecified conditions: constant alpha 0.1; constant alpha 0.03; and alpha(s,a) = 0.1/(1 + N_previous(s,a)/1000). N_previous counts updates to that pair before the current update. At 0, 1,000, and 3,000 prior updates, alpha is 0.1, 0.05, and 0.025. Scale 1,000 was chosen before the experiment. All other settings and the legal greedy evaluator stayed fixed.")
+    p("Fifteen runs recorded 300 checkpoints and 2,100 diagnostics for the seven originally suboptimal states. Equal seeds do not ensure identical experience across conditions: changed policies can alter later transitions and RNG consumption. Every run, including equal-cost policies, remains in the evidence.")
+    labels = {'constant_0.1': 'Constant 0.1', 'constant_0.03': 'Constant 0.03', 'visit_decay': 'Visit decay'}
+    rate_summary = rows('learning_dynamics_across_seed_summary.csv')
+    table(["Condition", "Mean exact cost", "Across-seed cost range", "Mean optimality gap"], [[labels[r['condition']], money(r['mean_exact_cost']), f"[{money(r['min_exact_cost'])}, {money(r['max_exact_cost'])}]", money(r['mean_gap'])] for r in rate_summary], [1.5, 1.5, 2.7, 1.5])
+    comparison = next(r for r in rows('learning_dynamics_paired_comparisons.csv') if r['training_seed'] == '66401')
+    reduction03 = float(comparison['cost_alpha_0.1']) - float(comparison['cost_alpha_0.03'])
+    reduction_decay = float(comparison['cost_alpha_0.1']) - float(comparison['cost_visit_decay'])
+    p(f"Both alternatives lowered every seed's final exact cost relative to alpha 0.1. For seed 66401, reductions were {money(reduction03)} with alpha 0.03 and {money(reduction_decay)} with visit decay. Every final policy still had a positive optimality gap. Checkpoint costs fluctuated in all conditions; action switches accompanied performance changes, but sparse checkpoints do not isolate their cause. No best-checkpoint selection was performed.")
+    p("Complete evidence: [all fifteen final runs](results/learning_dynamics_final_comparison.csv), [paired rate comparisons](results/learning_dynamics_paired_comparisons.csv), [all checkpoints](results/learning_dynamics_checkpoints.csv), [state diagnostics](results/learning_dynamics_tracked_states.csv), and the [saved dynamics figure](results/learning_dynamics_checkpoint_gaps.png). Methods and outputs are also in the [main Notebook](CS664_Flight_Booking.ipynb).")
+    h("9. Limitations")
+    p("The model uses hypothetical probabilities, five fare levels, a short horizon, and no sold-out events; it provides no evidence of real-flight savings. Paired intervals quantify test-path uncertainty for one policy, not training uncertainty or individual-trip outcomes. Across-seed ranges describe five selected seeds, not confidence intervals; two budgets do not establish a continuous trend. Supplementary analyses are exploratory, not independent confirmation, and do not establish universal robustness or convergence. Fixed-step target variability, decay, learning speed, and coverage may matter, but their causal contributions were not isolated. No simultaneous inference or additional tuning is claimed.")
+    h("10. Reproducibility and references")
+    p("Follow [README setup and execution instructions](README.md) for the pinned environment, project interpreter, Notebook kernel, and fresh-kernel runner. [RESULTS.md](RESULTS.md) indexes the complete saved outputs. Full per-seed results and full-precision artifacts are retained; this report revision uses saved evidence without rerunning experiments.")
     for text in [
-        "[1] Kalathur, S. (2026). CS664 Term Project. Instructor-provided metcs664_TermProject.pdf. Used for the official deliverables and demo requirements; excluded from the ZIP.",
-        "[2] CS664_Project_Wong_Sheung_Wan_Proposal.md. Original supplied English implementation plan, unchanged. CS664_Flight_Booking.ipynb, RESULTS.md, and results/ supply the executed numerical evidence; report_assets/report_number_audit.json maps validation to those artifacts.",
-        "[3] Watkins, C. J. C. H., & Dayan, P. (1992). Q-learning. Machine Learning, 8, 279–292. https://doi.org/10.1007/BF00992698. Publisher abstract and bibliographic page consulted for algorithm background; not a claim that this finite project satisfies a convergence theorem.",
-        "[4] SciPy contributors. scipy.stats.t API documentation. https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html. Consulted October 14, 2026 for the Student-t quantile used in paired intervals.",
-        "[5] NumPy contributors. Random Generator documentation. https://numpy.org/doc/stable/reference/random/generator.html. Consulted October 14, 2026 for seeded random-generator behavior."]:
+        "[1] Kalathur, S. (2026). CS664 Term Project. Instructor-provided metcs664_TermProject.pdf; official project requirements.",
+        "[2] [Original project proposal](CS664_Project_Wong_Sheung_Wan_Proposal.md); [executed Notebook](CS664_Flight_Booking.ipynb). Numerical audit: [report_number_audit.json](report_assets/report_number_audit.json).",
+        "[3] Watkins, C. J. C. H., & Dayan, P. (1992). Q-learning. Machine Learning, 8, 279–292. [Publisher reference](https://doi.org/10.1007/BF00992698). Algorithm background; no convergence theorem is claimed for this experiment.",
+        "[4] SciPy contributors. [scipy.stats.t documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html). Student-t quantile; consulted October 14, 2026.",
+        "[5] NumPy contributors. [Random Generator documentation](https://numpy.org/doc/stable/reference/random/generator.html). Seeded random streams; consulted October 14, 2026."]:
         p(text)
-    p("External references were consulted to validate method explanations while drafting, not used as flight-price data. This remains a draft awaiting student review.")
     return blocks
 
 
@@ -267,6 +285,11 @@ def make_documents(blocks):
     from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.lib.units import inch
     import matplotlib
+    def pdf_text(text):
+        # Keep evidence links usable in all three report formats.
+        return re.sub(r'\[([^\]]+)\]\(([^)]+)\)',
+                      lambda m: '<link href="' + escape(m[2], {'"': '&quot;'}) +
+                      '" color="#184e77"><u>' + m[1] + '</u></link>', escape(text))
     font_folder = Path(matplotlib.get_data_path()) / "fonts" / "ttf"
     pdfmetrics.registerFont(TTFont("Report", str(font_folder / "DejaVuSans.ttf")))
     pdfmetrics.registerFont(TTFont("ReportBold", str(font_folder / "DejaVuSans-Bold.ttf")))
@@ -281,7 +304,7 @@ def make_documents(blocks):
     for kind, data in blocks:
         if kind in ("title", "heading", "paragraph"):
             key={"title":"TitleReport","heading":"HeadingReport","paragraph":"BodyReport"}[kind]
-            flow.append(Paragraph(escape(data),styles[key]))
+            flow.append(Paragraph(pdf_text(data),styles[key]))
         elif kind=="table":
             headers,values,widths=data
             widths=[w*inch for w in widths] if widths else [7.2*inch/len(headers)]*len(headers)
@@ -320,10 +343,27 @@ def make_documents(blocks):
     normal.paragraph_format.space_after=Pt(6)
     document.core_properties.title="Flight Booking Decision Assistant — Draft"
     document.core_properties.author="Prepared for Sheung Wan Wong"
+    def add_linked_paragraph(text):
+        from docx.opc.constants import RELATIONSHIP_TYPE as RT
+        paragraph = document.add_paragraph()
+        end = 0
+        for match in re.finditer(r'\[([^\]]+)\]\(([^)]+)\)', text):
+            paragraph.add_run(text[end:match.start()])
+            link = OxmlElement('w:hyperlink')
+            link.set(qn('r:id'), paragraph.part.relate_to(match[2], RT.HYPERLINK, is_external=True))
+            run = OxmlElement('w:r')
+            props = OxmlElement('w:rPr')
+            color = OxmlElement('w:color'); color.set(qn('w:val'), '184E77'); props.append(color)
+            underline = OxmlElement('w:u'); underline.set(qn('w:val'), 'single'); props.append(underline)
+            run.append(props)
+            label = OxmlElement('w:t'); label.text = match[1]; run.append(label)
+            link.append(run); paragraph._p.append(link)
+            end = match.end()
+        paragraph.add_run(text[end:])
     for kind,data in blocks:
         if kind=='title':document.add_heading(data,0)
         elif kind=='heading':document.add_heading(data,1)
-        elif kind=='paragraph':document.add_paragraph(data)
+        elif kind=='paragraph':add_linked_paragraph(data)
         elif kind=='pagebreak':document.add_page_break()
         elif kind=='figure':
             path,caption,width,height=data
@@ -364,15 +404,15 @@ def make_documents(blocks):
 
 
 def verify_pdf_and_docx():
-    import fitz
+    import pymupdf as fitz
     from docx import Document
     from PIL import Image,ImageOps,ImageDraw
     folder=ROOT/'.cache'/'report_preview';folder.mkdir(parents=True,exist_ok=True)
     pdf=fitz.open(ROOT/f'{NAME}.pdf')
     text='\n'.join(page.get_text() for page in pdf)
-    assert len(pdf)>0 and 'DRAFT' in text and 'References and evidence sources' in text
-    for token in ['239.580','223.476','219.738','214.854','207.274224','215.709120','8.434896',
-                  '220.978560','213.324883','209.164944','23.837947','25.614053','182.36']:
+    assert 5 <= len(pdf) <= 6 and 'DRAFT' in text and 'Reproducibility and references' in text
+    for token in ['239.58','223.48','219.74','214.85','207.274224','215.709120','8.434896',
+                  '220.98','213.32','209.16','23.84','25.61','10.01','10.29']:
         assert token in text,token
     thumbnails=[]
     for i,page in enumerate(pdf):
@@ -389,12 +429,38 @@ def verify_pdf_and_docx():
     sheet.save(folder/'contact_sheet.png')
     doc=Document(ROOT/f'{NAME}.docx')
     doc_text='\n'.join(p.text for p in doc.paragraphs)+'\n'+'\n'.join(c.text for t in doc.tables for r in t.rows for c in r.cells)
-    assert 'DRAFT' in doc_text and 'References and evidence sources' in doc_text
-    assert len(doc.inline_shapes)==2
-    for token in ['207.274224','215.709120','209.164944','214.854']:
+    assert 'DRAFT' in doc_text and 'Reproducibility and references' in doc_text
+    assert len(doc.inline_shapes)==1
+    for token in ['207.274224','215.709120','209.16','214.85']:
         assert token in doc_text
+    # Compare every retained paragraph and table cell across generated formats.
+    normalize = lambda value: re.sub(r'\s+', '', value)
+    plain = lambda value: re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', value)
+    blocks = report_blocks(json.loads((RESULTS/'run_summary.json').read_text()))
+    for kind, data in blocks:
+        if kind in ('title', 'heading', 'paragraph'):
+            expected = [plain(data)]
+        elif kind == 'table':
+            expected = [str(v) for row in [data[0]] + data[1] for v in row]
+        elif kind == 'figure':
+            expected = [data[1]]
+        else:
+            continue
+        for value in expected:
+            assert normalize(value) in normalize(text), ('PDF', value)
+            assert normalize(value) in normalize(doc_text), ('DOCX', value)
+    markdown = (ROOT/'REPORT_DRAFT.md').read_text()
+    links = re.findall(r'\]\(([^)]+)\)', markdown)
+    doc_links = {r.target_ref for r in doc.part.rels.values() if r.reltype.endswith('/hyperlink')}
+    for link in links:
+        if '://' not in link:
+            assert (ROOT/link).is_file(), link
+        if not link.endswith('.png'):
+            assert link in doc_links, link
     result={'pdf_pages':len(pdf),'pdf_text_inside_page_bounds':True,'key_report_numbers_present':True,
-            'docx_readable_and_tables_present':True,'embedded_figures':2,'rendered_pages_folder':str(folder.relative_to(ROOT))}
+            'docx_readable_and_tables_present':True,'embedded_figures':1,
+            'all_paragraphs_and_table_cells_match_source':True,'evidence_links_valid':True,
+            'rendered_pages_folder':str(folder.relative_to(ROOT))}
     pdf.close()
     (ASSETS/'document_validation.json').write_text(json.dumps(result,indent=2)+'\n')
     return result
@@ -462,20 +528,24 @@ def make_archive():
 
 
 def main():
+    import sys
+    report_only = '--report-only' in sys.argv
     protected=[ROOT/'CS664_Flight_Booking.ipynb',ROOT/'CS664_Flight_Booking_Practice.ipynb',
-               ROOT/'CS664_Project_Wong_Sheung_Wan_Proposal.md']+[p for p in RESULTS.rglob('*') if p.is_file()]
+               ROOT/'CS664_Project_Wong_Sheung_Wan_Proposal.md', ROOT/'PRESENTATION_SCRIPT.md']+[p for p in RESULTS.rglob('*') if p.is_file()]
+    if report_only:
+        protected.append(ROOT/f'{NAME}.zip')
     before={str(p.relative_to(ROOT)):fingerprint(p) for p in protected}
     summary,runtime=audit_saved_evidence()
-    graph=make_report_figure()
-    make_documents(report_blocks(summary,runtime,graph))
+    make_documents(report_blocks(summary,runtime))
     document_checks=verify_pdf_and_docx()
-    package_checks=make_archive()
+    package_checks=None if report_only else make_archive()
     assert before=={str(p.relative_to(ROOT)):fingerprint(p) for p in protected}
     (ASSETS/'preservation_validation.json').write_text(json.dumps({'status':'PASS',
         'protected_files_unchanged':True,'protected_sha256':before,'training_rerun':False},indent=2)+'\n')
     print('Report draft created:',ROOT/f'{NAME}.pdf',ROOT/f'{NAME}.docx')
     print('PDF pages:',document_checks['pdf_pages'],'; rendered for visual inspection.')
-    print('ZIP verified:',ROOT/f'{NAME}.zip','files:',package_checks['files'])
+    if package_checks:
+        print('ZIP verified:',ROOT/f'{NAME}.zip','files:',package_checks['files'])
     print('PASS: every report number audited; main/practice/proposal and all original results unchanged.')
 
 

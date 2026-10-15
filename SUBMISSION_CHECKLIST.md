@@ -43,8 +43,8 @@ and this checklist stay outside the ZIP. The ZIP contains one top-level folder
   final costs for all five seeds relative to alpha 0.1. Every final policy still
   had a positive optimality gap. This exploratory evidence does not establish
   convergence, an optimal learning rate, a unique cause, or real-flight savings.
-- [ ] Review limitations, references, and accurate Codex assistance disclosure.
-  Confirm any additional course guidance on AI assistance personally.
+- [ ] Review limitations and references. Confirm any additional course guidance
+  on AI assistance personally.
 - [ ] Decide whether to retain the draft label or produce a reviewed final version.
 
 ## Checks completed by the assistant
@@ -56,9 +56,9 @@ and this checklist stay outside the ZIP. The ZIP contains one top-level folder
   supplementary tables, and their summaries against saved evidence.
 - [x] Found 80 sequentially executed main code cells with no saved error outputs.
   The existing recorded full run was used; training was not rerun for packaging.
-- [x] Rendered all nine PDF pages, inspected the page overview and detailed
+- [x] Rendered all five PDF pages, inspected the page overview and detailed
   tables/figures, and checked text bounds. Opened the DOCX and checked tables,
-  editable text, and its two embedded figures. DOCX pagination can vary by editor.
+  editable text, and its embedded heatmap. DOCX pagination can vary by editor.
 - [x] ZIP CRC check passed. Extracted the ZIP to a temporary directory and
   confirmed all 54 files match their sources, correct top-level folder, all
   linked runtime/result artifacts, required modules, and pinned dependencies.
@@ -72,9 +72,10 @@ and this checklist stay outside the ZIP. The ZIP contains one top-level folder
   original proposal, and all 47 official result files were unchanged.
 
 Audit records are in `report_assets/` in the source repository, outside the ZIP.
-The recorded first-cell-busy to last-cell-idle interval was **182.36 seconds**;
-this excludes kernel startup and runner postchecks. Full CLI wall time was not
-measured. Full execution includes supplementary training; no fixed runtime is
+The latest recorded first-cell-busy to last-cell-idle interval was **172.40 seconds**;
+this excludes kernel startup and runner postchecks. The student reported
+**2:55.26** elapsed for one CLI run; this was not independently measured here.
+Full execution includes supplementary training; no fixed runtime is
 promised for your machine. No full training run was performed in the extracted
 package solely for packaging; compilation, references, fixtures, and saved
 execution evidence were checked.

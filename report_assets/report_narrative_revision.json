@@ -1,15 +1,40 @@
 {
   "status": "PASS",
-  "change": "Removed assistance paragraph and renamed section 10 to Reproducibility. No other report-source content changed.",
+  "pdf_pages": 5,
+  "previous_pdf_pages": 9,
+  "draft_status": "awaiting student review",
   "source_pdf_docx_consistent": true,
-  "experimental_results_notebooks_proposal_zip_unchanged": true,
+  "substantive_cuts": [
+    "Condensed proposal history and administrative commentary.",
+    "Removed runner portability, fingerprint, timing, and packaging history; supporting documentation remains unchanged.",
+    "Replaced ten-run and fifteen-run listings with complete across-seed mean/range summaries and links to full CSV/Notebook evidence.",
+    "Replaced detailed checkpoint/state-switch discussion and report dynamics figure with a short finding and links to saved checkpoints, diagnostics, and figure.",
+    "Consolidated limitations and removed repeated findings and code-inventory detail."
+  ],
+  "retained": [
+    "goal/proposal summary",
+    "simulator assumptions/probabilities",
+    "training settings/actual Q update",
+    "four sampled strategy means",
+    "paired savings/95% intervals",
+    "exact optimal and learned costs/gap",
+    "policy heatmap/complete trace",
+    "executed verification",
+    "supplementary methods/summary results/limitations",
+    "README reproducibility/reference links"
+  ],
+  "display_precision": "two decimal places for monetary summaries; six for exact original optimal/learned expectations and their gap",
+  "differences_calculated_before_rounding": true,
+  "all_pdf_pages_visually_inspected": true,
+  "observed_clipping": false,
+  "fonts_and_margins_unchanged": true,
   "training_rerun": false,
-  "pdf_pages": 9,
+  "experimental_results_notebooks_proposal_presentation_zip_unchanged": true,
   "protected_sha256": {
-    "CS664_Flight_Booking.ipynb": "dddcbef9b6f8486230a5851b6956a7adb853653d8ab522263a5c10027f601a5c",
+    "CS664_Flight_Booking.ipynb": "64238baddbad1a23dd474f459d8bcc1911281a4e601ac68110444e6fa165ac4c",
     "CS664_Flight_Booking_Practice.ipynb": "ec65c241e0a40a3abfa0436d48989c3747d2a5977c767af57ab1470bf3c5f561",
     "CS664_Project_Wong_Sheung_Wan_Proposal.md": "f01458e43d7479d5ca88d6dc4e507248ff0ff5b528c06123b90c2d45f63cc459",
-    "CS664_Project_Wong_Sheung_Wan.zip": "cc5af131484b5e5b1ada679b531efb42aa8f77ead9c0235cb0d2de2f8ee22db9",
+    "PRESENTATION_SCRIPT.md": "9e8832e3d127a7b59acccc4e8202fd58e0f0366a357ce7f2cc52789d5b63978f",
     "results/supplementary_training_runs.csv": "652e5e26bc54d4f55db5a78dab50b738f7dcd730389f4aa795c4ac522c0463d0",
     "results/learning_dynamics_state_summary.csv": "8efccbbd42b7599b869340801f84c965e9b1216f9d5d078fa8224b96bd669f56",
     "results/learning_dynamics_checkpoint_changes.csv": "aa9e134e8914d4fb21f1b0e450b9428987c44b67db60653d42ed0e045d85098b",
@@ -56,6 +81,8 @@
     "results/learning_dynamics_across_seed_summary.csv": "66855af850b2cc89bb8e05d3cd668713779b04c674c2e8c6c508f0823cfc3ec3",
     "results/learning_dynamics_checkpoint_gaps.png": "d78d6c7ec9d560b63e973ddde28491ef4c716e6579bfc3f3ae48be3a74ad6a4b",
     "results/verification_results.csv": "e8516eb3265fc20ebe1723bf277f0bdc0b79a7825dddf424cba096f50604d7c6",
-    "results/learning_dynamics_summary.json": "0f62614262d492dee4c2cbc1c343894977606bb8c0d9bc66c314f1093b330ba7"
-  }
+    "results/learning_dynamics_summary.json": "0f62614262d492dee4c2cbc1c343894977606bb8c0d9bc66c314f1093b330ba7",
+    "CS664_Project_Wong_Sheung_Wan.zip": "cc5af131484b5e5b1ada679b531efb42aa8f77ead9c0235cb0d2de2f8ee22db9"
+  },
+  "preservation_scope": "The protected hashes record report-generation time; later authorized presentation and ZIP changes are covered by preservation_validation.json and package_validation.json."
 }

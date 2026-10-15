@@ -51,9 +51,10 @@ No additional packages or commands
 are required. The runner never writes the practice Notebook and permits you
 to save your practice attempts while the main experiment runs.
 
-The latest saved 80-cell execution spans **182.36 seconds** from the first cell's
+The latest saved 80-cell execution spans **172.40 seconds** from the first cell's
 busy timestamp to the last cell's idle timestamp. This recorded interval excludes
-kernel startup and runner postchecks; complete CLI wall time was not measured.
+kernel startup and runner postchecks. The student reported **2:55.26** elapsed
+for one CLI run; that observation was not independently measured here.
 It is an observation from the saved run, not a promised runtime on other machines.
 Full execution includes all supplementary training and may take longer than a
 core-results demo. `project_verification.py` is required by the runner and is

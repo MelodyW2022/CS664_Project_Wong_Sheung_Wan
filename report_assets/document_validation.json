@@ -1,10 +1,17 @@
 {
-  "pdf_pages": 9,
+  "pdf_pages": 5,
   "pdf_text_inside_page_bounds": true,
   "key_report_numbers_present": true,
   "docx_readable_and_tables_present": true,
-  "embedded_figures": 2,
+  "embedded_figures": 1,
+  "all_paragraphs_and_table_cells_match_source": true,
+  "evidence_links_valid": true,
   "rendered_pages_folder": ".cache/report_preview",
-  "revised_final_page_visually_inspected": true,
-  "observed_clipping_on_revised_page": false
+  "all_pdf_pages_overview_inspected": true,
+  "detailed_pages_inspected": [
+    2,
+    5
+  ],
+  "observed_clipping": false,
+  "readable_tables_figures_and_page_breaks": true
 }
