@@ -34,13 +34,13 @@ Screen / Point to:
 
 Say:
 
-The state is time remaining and price, with seven opportunities from time six to zero and five possible starting prices chosen uniformly. BOOK gives a negative-price reward and ends the episode; WAIT gives zero reward and advances one day, while the deadline forces BOOK.
+Here, the state tells the agent the price and how much time is left. There are seven chances to buy, from time six to zero. Each starting price is equally likely. BOOK pays the current price and ends the episode. Its reward is the negative price, so a cheaper purchase gives a better reward. WAIT gives zero reward and moves forward one day. At time zero, the program forces a purchase.
 
 ## 1:15–1:55 — Daily price changes and boundaries
 
 Conclusion:
 
-**The simulator uses assumed daily price changes and keeps fares within bounds.**
+**Daily prices can rise, stay the same, or fall.**
 
 Screen / Point to:
 
@@ -50,13 +50,13 @@ Screen / Point to:
 
 Say:
 
-Cell 2A samples a rise, no change, or fall and keeps fares between 120 and 360 dollars. These probabilities are hypothetical; Cell 2B rejects any further action after purchase.
+Here, the program randomly chooses a price increase, no change, or a decrease. The chances change as the deadline gets closer. These are assumptions for the experiment, not patterns measured from real flights. Clipping stops prices from going below 120 or above 360 dollars. The other check stops the agent from taking another action after it has bought.
 
 ## 1:55–2:45 — One Q-value update and legal targets
 
 Conclusion:
 
-**Q-learning improves an action estimate by moving its old value toward a target.**
+**Each Q update adjusts what the agent expects from an action.**
 
 Screen / Point to:
 
@@ -66,13 +66,13 @@ Screen / Point to:
 
 Say:
 
-In the logged BOOK update, the old value is zero, the target is negative 120, and alpha is 0.1, giving an updated value of negative 12. A terminal target is reward alone; WAIT adds the best legal future estimate, with gamma one.
+Here is an actual update from the first training episode. The agent booked at 120 dollars. The old Q-value was zero, and the target was negative 120. The learning rate was 0.1, so the new value became negative 12. Booking ends the trip, so there is nothing more to add. For WAIT, the target also includes the best estimated value at the next state. At the deadline, only BOOK is allowed. Gamma is one, so future cost is not discounted.
 
 ## 2:45–3:20 — Exploration during training
 
 Conclusion:
 
-**Training explores actions, while evaluation follows the learned policy greedily.**
+**Training tries different actions, while testing uses what the agent learned.**
 
 Screen / Point to:
 
@@ -82,7 +82,7 @@ Screen / Point to:
 
 Say:
 
-The original training runs 50,000 episodes, with epsilon falling from one to 0.05 over 40,000 episodes and then staying there. Evaluation uses the greedy action without exploration or Q updates.
+Training starts with a zero-filled table and runs for 50,000 episodes. The agent first chooses actions randomly. Over the first 40,000 episodes, the chance of a random choice falls to five percent and stays there. This helps it try both actions. During testing, it always picks the action with the higher Q-value. It makes no random choices and does not update the table.
 
 ## 3:20–4:20 — Fair comparison and validation questions
 
@@ -99,7 +99,7 @@ Screen / Point to:
 
 Say:
 
-All four strategies use the same 10,000 fresh paths from a separate test seed, and each decision sees only its current state. The three questions are whether costs fall, how reliable the savings are, and how close the policy is to optimal with a correct implementation.
+Here, every strategy faces the same 10,000 new price paths. Training and testing use separate random seeds. The program stores the whole path, but each booking decision receives only today’s price and time remaining. It cannot look ahead, and it stops after buying. This lets us ask three questions: Does Q-learning lower the cost? How reliable are the savings? How close is it to the best possible policy, and does the code follow the rules?
 
 ## 4:20–4:50 — Confirm full execution and reload
 
@@ -115,13 +115,13 @@ Screen / Point to:
 
 Say:
 
-The runner executed all 80 code cells, including both supplementary studies, without errors. The numerical checks passed, and the saved Notebook has been reopened.
+The runner reports that all 80 code cells finished without errors. That includes the original experiment and both supplementary studies. It also checked that the original numerical results stayed the same. I have now reopened the saved Notebook, so these are the new outputs.
 
 ## 4:50–5:20 — Four-strategy mean costs
 
 Conclusion:
 
-**The original learned policy had the lowest sampled mean cost among the four strategies.**
+**Q-learning had the lowest average purchase cost in this test.**
 
 Screen / Point to:
 
@@ -130,7 +130,7 @@ Screen / Point to:
 
 Say:
 
-The sample means were $239.58 for buying immediately, $223.48 for buying at $120 or the deadline, $219.74 for buying at $180 or below or the deadline, and $214.85 for Q-learning. These are sampled costs, not analytical expectations.
+Here are the four averages. Buying immediately cost $239.58. Buying at $120, or at the deadline, cost $223.48. Buying at $180 or below, or at the deadline, cost $219.74. Q-learning cost $214.85. These are averages from the test paths, so another test sample could give slightly different numbers.
 
 ## 5:20–5:40 — One complete decision trace
 
@@ -145,13 +145,13 @@ Screen / Point to:
 
 Say:
 
-This trace waits from a starting price of $360 until the deadline, then books for $360. The final BOOK ends the episode; the trace is an illustration, not a performance estimate.
+This table follows one trip from start to finish. The agent starts at $360, keeps waiting, and finally books at the deadline for $360. The last row ends the episode. One trip cannot tell us which strategy is cheaper on average.
 
 ## 5:40–6:30 — Paired confidence intervals
 
 Conclusion:
 
-**The paired intervals support positive mean savings for this fixed trained policy.**
+**These intervals support average savings against all three baselines.**
 
 Screen / Point to:
 
@@ -160,13 +160,13 @@ Screen / Point to:
 
 Say:
 
-Against the $180 rule, paired mean saving was about $4.88, with a 95% interval of about $4.03 to $5.74. These individual intervals concern uncertainty in mean savings for one fixed policy, not individual-trip ranges or training-seed variation, and are not simultaneous intervals.
+Here, I’m comparing Q-learning with the rule that buys at $180 or below. On the same trips, Q-learning saved about $4.88 on average. The 95 percent confidence interval runs from about $4.03 to $5.74. Both ends are above zero, which supports positive average savings in this model. This interval is about the average, not what happens on each trip. It also does not tell us how much a different training seed would change the policy. The 95 percent level applies to each comparison separately.
 
 ## 6:30–7:10 — Exact optimal reference
 
 Conclusion:
 
-**The original learned policy is still suboptimal.**
+**The learned policy still leaves room for improvement.**
 
 Screen / Point to:
 
@@ -176,13 +176,13 @@ Screen / Point to:
 
 Say:
 
-Backward induction compares buying now with waiting, using known simulator probabilities that the learner never receives. The analytical optimum is about $207.27, compared with $215.71 for the original learned policy, leaving a gap of about $8.43.
+Because we know the simulator’s probabilities, we can calculate expected costs without sampling test paths. The calculation starts at the deadline and works backward, comparing buying now with waiting. The best possible policy costs about $207.27 on average. The original learned policy costs about $215.71. That leaves a gap of about $8.43. These are calculated model expectations, which is why they differ from the earlier test averages. The learning agent does not receive the probability table.
 
 ## 7:10–7:50 — Policy heatmap and implementation checks
 
 Conclusion:
 
-**The executed checks support correctness, without proving convergence.**
+**The checks passed, but they cannot prove the policy will reach the optimum.**
 
 Screen / Point to:
 
@@ -192,7 +192,7 @@ Screen / Point to:
 
 Say:
 
-The heatmap maps current price and time to an action, with BOOK at every deadline price. Checks passed for transitions, boundaries, rewards, deadline booking, termination, and future-price isolation; finite checks cannot rule out every bug.
+Here, each heatmap square tells us whether to BOOK or WAIT at a given price and time. Every square at the deadline says BOOK. The checks below test price changes, boundaries, rewards, forced booking, and stopping after purchase. They also check that changing prices after purchase cannot change the decision. The checks passed, but testing these cases cannot rule out every possible bug.
 
 ## 7:50–8:20 — Supplementary training budgets
 
@@ -207,7 +207,7 @@ Screen / Point to:
 
 Say:
 
-Each seed restarted at 50,000 and 200,000 episodes with the original settings, and every final expected cost rose at the larger budget. This shows training-seed variation, while two budgets do not establish a continuous trend.
+First, this study changes the amount of training. It uses five training seeds to see how results vary between runs. Each seed starts from scratch at both 50,000 and 200,000 episodes. With the original settings, all five final costs were higher at 200,000. Two budgets do not tell us what happens at every training length.
 
 ## 8:20–8:50 — Supplementary learning rates
 
@@ -224,7 +224,7 @@ Screen / Point to:
 
 Say:
 
-Across five seeds at 200,000 episodes, mean exact costs were about $220.98 with alpha 0.1, $213.32 with alpha 0.03, and $209.16 with visit-based decay. Both alternatives improved all five final policies, but positive remaining gaps leave the cause unresolved and do not prove convergence.
+The next study keeps training at 200,000 episodes and compares three learning-rate settings across five seeds. Average model costs were about $220.98 with 0.1, $213.32 with 0.03, and $209.16 with visit-based decay. Both alternatives improved all five final policies. That demonstrates an effect under these tested conditions. Every policy still cost more than the optimum. We do not yet have a complete explanation for the remaining gap.
 
 ## 8:50–9:35 — Limitations
 
@@ -239,7 +239,7 @@ Screen / Point to:
 
 Say:
 
-The model assumes its price probabilities and omits refunds, cancellations, and sold-out events. Supplementary results show sensitivity to tested rates, not an optimal setting or a unique explanation for the remaining gap.
+The prices and probabilities are made up for this experiment. The model also leaves out refunds, cancellations, and sold-out flights. The original comparison supports lower average costs, and the intervals describe uncertainty for that trained policy. The exact reference still shows a gap. The later experiments improved results with different learning rates, but they do not prove those settings are best or that training will reach the optimum.
 
 ## 9:35–10:00 — Closing
 
@@ -254,4 +254,4 @@ Screen / Point to:
 
 Say:
 
-This project demonstrates a complete Python Q-learning workflow, from the environment to evaluation and verification. Thank you for watching.
+This project connects a booking problem with a complete learning and evaluation process. It shows why a good average result still needs uncertainty estimates and a check against the best possible policy. Thank you for watching.
