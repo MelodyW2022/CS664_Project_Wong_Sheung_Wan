@@ -20,7 +20,7 @@ Prices can rise, stay unchanged, or fall. The chance of falling changes from for
 
 (Cell 2A: `np.clip`.) Prices stay between one hundred twenty and three hundred sixty dollars.
 
-(Cell 2B: `reset`.) The state contains price and time remaining. There are seven opportunities.
+(Cell 2B: `reset`.) The state contains time remaining and price. There are seven opportunities.
 
 (Cell 2B: `effective_action`.) BOOK gives a negative price reward and ends the episode. WAIT gives zero reward and advances one day. The deadline forces BOOK.
 
@@ -76,7 +76,7 @@ Known simulator probabilities let us calculate expected costs without sampling t
 
 (Cell 7A: `ax.set_xticks`.) (Cell 7A: `display`; output: axes and deadline row.) Now, let’s read the learned policy.
 
-Each square shows BOOK or WAIT for a price and time. Every deadline square says BOOK.
+Each square shows BOOK or WAIT for time remaining and price. Every deadline square says BOOK.
 
 ## 8. Paired 95% confidence intervals (6:15–7:00, approximate)
 
