@@ -2,6 +2,7 @@
 
 ## Before recording
 
+- [ ] Treat script timestamps as rehearsal estimates, not measured durations. Allow time to point at each listed line, inspect rows, and navigate; do not rush or add repetitive narration.
 - [ ] Camera and microphone on; test sound and readable code. Keep the camera overlay away from tables.
 - [ ] Share the main Notebook and terminal. Keep the script on an unshared screen or printed page. Close practice and personal tabs; silence notifications.
 - [ ] Open the project root. Select `.venv/bin/python` and kernel `Python (CS664 Flight Booking)` (`cs664-flight-booking`).
