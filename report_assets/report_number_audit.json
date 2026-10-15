@@ -8,13 +8,33 @@
     "10000 paired costs and means",
     "three paired Student-t intervals",
     "exact costs/gap",
-    "actual logged update",
+    "BOOK and WAIT records against saved Notebook output",
     "complete trace",
     "ten budget runs",
     "fifteen rate runs",
     "300 checkpoints/2100 diagnostics",
     "reported means/ranges",
     "saved PASS records",
+    "all 70 original Q entries/65 legal pairs and 35 saved greedy actions",
+    "original Q array identical to saved seed-66401/50000 supplementary endpoint",
+    "180 threshold rationale against saved proposal analytical comparison",
+    "Q examples/heatmap patterns, lowest sampled mean and strongest baseline",
+    "budget mean increase and lowest tested learning-rate mean",
+    "all five seeds and twenty checkpoints per learning-rate condition",
     "prose coverage, rate, action-switch, and update examples"
-  ]
+  ],
+  "unavailable_evidence": [
+    "Actual episode-376 update: observed next price",
+    "Actual episode-376 update: historical next-state Q-value snapshot"
+  ],
+  "report_wait_example": {
+    "type": "illustrative; assumed Q-values, not an actual training log",
+    "reward": 0,
+    "assumed_next_q_book": -180,
+    "assumed_old_current_q_wait": -200,
+    "gamma": 1,
+    "alpha": 0.1,
+    "target": -180,
+    "updated": -198.0
+  }
 }

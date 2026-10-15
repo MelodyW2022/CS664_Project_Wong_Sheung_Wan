@@ -288,6 +288,5 @@
       "ci_95_upper": 5.738633506465487
     }
   ],
-  "ci_method": "individual paired Student-t; conditional on trained policy",
-  "personally_practiced_by_user": "Not established; user must run and explain the demo cells."
+  "ci_method": "individual paired Student-t; conditional on trained policy"
 }

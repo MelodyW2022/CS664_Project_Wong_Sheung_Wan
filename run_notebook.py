@@ -23,7 +23,8 @@ import nbformat
 from nbclient import NotebookClient
 from project_verification import numerical_evidence
 
-originals = [ROOT / "CS664_Project_Wong_Sheung_Wan_Proposal.md"]
+proposal = ROOT / "CS664_Project_Wong_Sheung_Wan_Proposal.md"
+originals = [proposal] if proposal.exists() else []
 assignment_pdf = ROOT / "metcs664_TermProject.pdf"
 if assignment_pdf.exists():
     originals.append(assignment_pdf)  # Instructor material remains local, outside Git.
@@ -53,7 +54,7 @@ assert result_hashes == numerical_evidence(ROOT / "results")
 nbformat.validate(notebook)
 nbformat.write(notebook, notebook_path)
 print(f"PASS: {len(code_cells)} code cells executed in a fresh kernel; no cell errors.")
-print("Proposal and local assignment PDF hashes unchanged.")
+print("Any locally present proposal and assignment PDF hashes unchanged.")
 practice_after = (hashlib.sha256(practice_notebook.read_bytes()).hexdigest()
                   if practice_notebook.exists() else None)
 if practice_before == practice_after:

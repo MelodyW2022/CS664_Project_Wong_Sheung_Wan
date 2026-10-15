@@ -52,14 +52,11 @@ it was selected as the first example with at least three decisions, not to estim
 90 transitions, all seven purchase days, rewards, deadline booking, termination,
 Q updates, 400 future-suffix checks, and independent 3,645-path expectations for five reference policies.
 
-## Limitations and remaining submission work
+## Limitations
 Individual paired 95% Student-t intervals are large-sample approximations conditional on this trained policy;
 they are not simultaneous intervals and do not quantify training-seed variation or real-flight uncertainty.
 The test trajectories are independent; cost differences retain within-trajectory pairing.
 Fixed-rate finite training does not guarantee convergence. Average savings do not guarantee savings on each trip.
-Practice is paused and the separate practice Notebook is unchanged. Agent execution is not personal practice.
-Still required: final PDF/Word proposal/writeup, project zip with README, and an approximately
-10-minute camera-on presentation with code explanation and a full demo, per the instructor PDF.
 
 ## Supplementary Validation and Optimality Investigation
 
@@ -112,7 +109,7 @@ Analytical action penalties use optimal continuation; equally optimal actions ar
 
 Only episode budget varied. Alpha remains 0.1; epsilon decays from 1 to 0.05 over the first 40,000 episodes, then holds. [Configuration](results/supplementary_experiment_config.json) · [actual schedule checkpoints](results/supplementary_schedule_checkpoints.csv) · [summary](results/supplementary_summary.json).
 
-Observed training-seed variability differs from the original paired 95% intervals for test-trajectory variation conditional on one policy. Constant-alpha estimation variability and exploration/coverage mechanisms are hypotheses, not tested causes. The remaining gap mechanism is unresolved; no additional tuning occurred. Checks support correctness in this teaching model, not convergence, universal seed robustness, per-trip savings, or performance on real flight prices. Agent execution is not personal practice.
+Observed training-seed variability differs from the original paired 95% intervals for test-trajectory variation conditional on one policy. Constant-alpha estimation variability and exploration/coverage mechanisms are hypotheses, not tested causes. The remaining gap mechanism is unresolved; no additional tuning occurred. Checks support correctness in this teaching model, not convergence, universal seed robustness, per-trip savings, or performance on real flight prices.
 
 ## Learning Dynamics and Learning-Rate Comparison
 
@@ -166,4 +163,4 @@ Instrumentation checks executed the decay examples at 0/1000/3000 previous pair 
 
 Tracked Q margins and action switches describe associations with checkpoint cost changes; untracked states can also change. Checkpoints do not reveal every intervening decision. Equal seeds across different-rate conditions need not produce identical training trajectories because different actions change subsequent experiences and RNG consumption.
 
-The final comparisons and fluctuations support sensitivity to these tested settings where outcomes differ, not a sole-cause explanation. The remaining gap mechanism is unresolved. Neither 0.03 nor visit decay with scale 1000 is proven optimal; no extra schedules, grid search, or tuning occurred. Fifteen finite runs do not prove convergence or necessary improvement with more training. Hypothetical transitions do not establish real-flight performance. Agent execution does not establish personal practice.
+The final comparisons and fluctuations support sensitivity to these tested settings where outcomes differ, not a sole-cause explanation. The remaining gap mechanism is unresolved. Neither 0.03 nor visit decay with scale 1000 is proven optimal; no extra schedules, grid search, or tuning occurred. Fifteen finite runs do not prove convergence or necessary improvement with more training. Hypothetical transitions do not establish real-flight performance.

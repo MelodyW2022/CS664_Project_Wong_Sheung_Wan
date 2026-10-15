@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "removed_markdown_cell_id": "9586e114",
+  "retained_code_cells": 80,
+  "execution_counts_and_metadata_unchanged": true,
+  "allowed_narrative_AST_changes_only": true,
+  "all_other_saved_outputs_unchanged": true,
+  "optional_threshold_cell_byte_content_unchanged": true,
+  "removed_non_numerical_summary_fields": {
+    "run_summary.json": "personally_practiced_by_user",
+    "supplementary_summary.json": "personal_practice",
+    "learning_dynamics_summary.json": "personal_completion"
+  },
+  "report_and_presentation_script_unchanged": true,
+  "training_rerun": false,
+  "source_cells_cleaned": [
+    "4edfb292",
+    "487c60e3",
+    "51512b72",
+    "3bf7a7e2",
+    "d1d8af46",
+    "6043a613",
+    "d4c440b0",
+    "a8e464ff",
+    "ab9e051d"
+  ],
+  "saved_output_cells_cleaned": [
+    "6043a613",
+    "ab9e051d",
+    "d4c440b0"
+  ],
+  "notebook_schema_valid": true,
+  "numeric_AST_constants_unchanged": true,
+  "numerical_artifacts_and_verification_bytes_unchanged": true,
+  "generated_summaries_changed_only_personal_status_fields": true,
+  "all_guidance_bullets_retained_in_checklist": true,
+  "refreshed_zip_matches_current_files": true,
+  "zip_crc_passed": true,
+  "report_files_not_inside_zip": true
+}

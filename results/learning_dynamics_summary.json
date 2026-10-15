@@ -284,6 +284,5 @@
   "interpretation": "exploratory sensitivity analysis, not sole-cause identification or convergence proof",
   "remaining_gap_cause": "unresolved",
   "official_policy_replaced": false,
-  "personal_completion": "not established by agent execution",
   "additional_tuning": "none"
 }

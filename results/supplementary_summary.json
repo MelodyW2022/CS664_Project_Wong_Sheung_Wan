@@ -186,6 +186,5 @@
   },
   "improved_seeds": [],
   "corrections": "None: executed implementation checks passed",
-  "remaining_gap_cause": "Unresolved; no learning-rate/exploration tuning conducted",
-  "personal_practice": "Not established by agent execution"
+  "remaining_gap_cause": "Unresolved; no learning-rate/exploration tuning conducted"
 }

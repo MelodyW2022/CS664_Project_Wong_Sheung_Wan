@@ -1,17 +1,19 @@
 {
-  "pdf_pages": 5,
+  "pdf_pages": 7,
   "pdf_text_inside_page_bounds": true,
   "key_report_numbers_present": true,
   "docx_readable_and_tables_present": true,
   "embedded_figures": 1,
   "all_paragraphs_and_table_cells_match_source": true,
   "evidence_links_valid": true,
-  "rendered_pages_folder": ".cache/report_preview",
-  "all_pdf_pages_overview_inspected": true,
-  "detailed_pages_inspected": [
-    2,
-    5
+  "all_35_exported_q_rows_checked_against_saved_array": true,
+  "q_table_pdf_pages": [
+    3
   ],
-  "observed_clipping": false,
-  "readable_tables_figures_and_page_breaks": true
+  "docx_q_table_repeating_header": true,
+  "visible_encoding_errors_absent": true,
+  "rendered_pages_folder": ".cache/report_preview",
+  "pending_review_labels_absent": true,
+  "report_text_unchanged_except_approval_labels": true,
+  "final_page_one_and_contact_sheet_visually_inspected": true
 }

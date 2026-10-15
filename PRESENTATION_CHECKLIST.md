@@ -27,6 +27,19 @@ Your personally observed CLI elapsed time was 2:55.26 for one run. It is not a g
 
 If the run is still active at the planned 3:50 boundary, wait for genuine completion before showing fresh results. Explain the delay and allow an overrun, or resolve the setup issue and record another complete take. If it repeatedly cannot fit, ask the instructor how to handle the timing conflict. Do not cut training budgets, omit experiments, call a partial run complete, or assume speed-up/editing is allowed.
 
+## Essential Notebook cells to run and explain
+
+Use these cells for the camera-on demo. Full-run and kernel instructions are in
+README.md; timed screen directions are in PRESENTATION_SCRIPT.md.
+
+- **1A:** parameters and separate training/test seeds.
+- **2A–2D:** transitions, boundaries, rewards, deadline, and termination.
+- **3A–3D:** exploration, legal targets, and actual Q updates.
+- **4A–4E:** shared trajectories, state-only decisions, four strategies, and costs.
+- **5A:** complete trace and final purchase.
+- **6A–6D, 7A–7B, 8A–8C, 9A–9C, 10A:** analytical references, heatmap, intervals, checks, and limits.
+- **S3C, L4B:** supplementary budget and learning-rate summaries.
+
 ## Final recording check
 
 - [ ] Camera stays on throughout.
