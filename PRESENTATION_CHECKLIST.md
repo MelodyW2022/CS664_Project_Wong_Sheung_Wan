@@ -20,12 +20,12 @@ time .venv/bin/python run_notebook.py
 
 - [ ] Explain code while it runs. Initially displayed outputs are from an earlier run.
 - [ ] Look for `PASS: 80 code cells executed in a fresh kernel; no cell errors.`, unchanged numerical evidence, the saved-Notebook message, and a returned prompt without a traceback.
-- [ ] At 4:20–4:50, reload from disk or close/reopen the main Notebook. Do not overwrite the new file with the old viewer contents.
+- [ ] At the boundary before Notebook Section 4, around 3:50, reload from disk or close/reopen the main Notebook. Do not overwrite the new file with the old viewer contents.
 - [ ] Check fresh displayed values before reading the script’s numbers aloud.
 
 Your personally observed CLI elapsed time was 2:55.26 for one run. It is not a guarantee. Start early and retain the completion/reload buffer.
 
-If the run is still active at 4:50, wait for genuine completion before showing fresh results. Explain the delay and allow an overrun, or resolve the setup issue and record another complete take. If it repeatedly cannot fit, ask the instructor how to handle the timing conflict. Do not cut training budgets, omit experiments, call a partial run complete, or assume speed-up/editing is allowed.
+If the run is still active at the planned 3:50 boundary, wait for genuine completion before showing fresh results. Explain the delay and allow an overrun, or resolve the setup issue and record another complete take. If it repeatedly cannot fit, ask the instructor how to handle the timing conflict. Do not cut training budgets, omit experiments, call a partial run complete, or assume speed-up/editing is allowed.
 
 ## Final recording check
 
@@ -37,3 +37,13 @@ If the run is still active at 4:50, wait for genuine completion before showing f
 - [ ] Check sound, readability, and approximately ten-minute duration before uploading the recording separately.
 
 The script and this checklist stay outside the submission ZIP.
+
+## Requirements-to-script check
+
+- [ ] Approximately ten minutes: timestamps are rehearsal estimates, including pointing and navigation.
+- [ ] Camera on: keep it visible throughout, as the instructor PDF requires.
+- [ ] Explain Python code: Notebook Sections 2–4 cover the environment, Q-learning, and evaluator.
+- [ ] Demo the whole project: launch the unchanged runner in Opening; wait for the final success messages, then reload from disk before Section 4. Do not claim completion while the job is active or failed.
+- [ ] Show results: follow Notebook Sections 4–10 in order, including the trace, exact reference, heatmap, intervals, and verification outputs.
+- [ ] Brief supplementary findings: continue downward through the two investigation sections. Short headings with only an operating cue are navigation stops, not additional explanations to read aloud.
+- [ ] Upload the recording separately, as the instructor PDF specifies.
