@@ -2,9 +2,9 @@
 
 ## Opening (0:00–0:40, approximate)
 
-(Show the Notebook title; keep your camera on. By 0:20, restart the kernel, then select Run All in this Notebook. Use this single run throughout the recording.) Hello, my name is Sheung Wan Wong. My project is Flight Booking Decision Assistant.
+(Show the Notebook title and saved outputs; keep your camera on. Use the completed command-line run’s results throughout the recording.) Hello, my name is Sheung Wan Wong. My project is Flight Booking Decision Assistant.
 
-The goal is to lower average booking cost. These displayed outputs are from an earlier successful run.
+The goal is to lower average booking cost. I ran the full Notebook once from the terminal; these are its saved results.
 
 ## 1. Setup and fixed experiment settings (0:40–0:55, approximate)
 
@@ -41,8 +41,6 @@ Over the first forty thousand episodes, the random choice rate falls to five per
 (Cell 3C: `q = np.zeros`.) (Cell 3C: `range(episodes)`.) Training starts with a zero Q-table and runs fifty thousand episodes.
 
 (Cell 3D: `print`; output: first observed update.) In the first episode, BOOK had an old value of zero and a target of negative one hundred twenty. With a learning rate of zero point one, **the updated value became negative twelve.**
-
-(Wait until Run All finishes: the kernel is idle, every code cell has completed, and no cell has an error. Check the final output, then return here; only then speak.) The full run has finished. These outputs are from this run.
 
 ## 4. Fair evaluation on 10,000 fresh trajectories (3:50–4:45, approximate)
 
