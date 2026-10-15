@@ -55,3 +55,5 @@ lecture_notes/
 # Temporary submission staging and generated upload archive
 submission_staging/
 /CS664_Project_Wong_Sheung_Wan.zip
+# Local extracted copy of the submission ZIP
+/CS664_Project_Wong_Sheung_Wan/
