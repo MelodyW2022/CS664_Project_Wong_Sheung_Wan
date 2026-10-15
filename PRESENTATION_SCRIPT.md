@@ -2,15 +2,15 @@
 
 ## Opening (0:00–0:40, approximate)
 
-(Show the Notebook title; keep your camera on.) Hello, my name is Sheung Wan Wong. My project is Flight Booking Decision Assistant.
+(Show the Notebook title; keep your camera on. By 0:20, restart the kernel, then select Run All in this Notebook. Use this single run throughout the recording.) Hello, my name is Sheung Wan Wong. My project is Flight Booking Decision Assistant.
 
-The goal is to learn when to book at a lower average cost. I previously ran the full Notebook successfully. These displayed outputs are from that earlier run.
+The goal is to lower average booking cost. These displayed outputs are from an earlier successful run.
 
 ## 1. Setup and fixed experiment settings (0:40–0:55, approximate)
 
 (Cell 1A: `TRAIN_SEED, TEST_SEED`.) First, let’s check the experiment settings.
 
-Training and testing use different random seeds.
+Training uses seed six six four zero one. Testing uses seed six six four zero two.
 
 ## 2. Price simulator (0:55–1:55, approximate)
 
@@ -22,7 +22,7 @@ Prices can rise, stay unchanged, or fall. The chance of falling changes from for
 
 (Cell 2B: `reset`.) The state contains time remaining and price. There are seven opportunities.
 
-(Cell 2B: `effective_action`.) BOOK gives a negative price reward and ends the episode. WAIT gives zero reward and advances one day. The deadline forces BOOK.
+(Cell 2B: `effective_action`.) BOOK gives the negative fare as reward and ends the episode. WAIT gives zero reward and advances one day. The deadline forces BOOK.
 
 ### 2C. Verify the simulator before training (1:55–2:10, approximate)
 
@@ -38,23 +38,21 @@ Over the first forty thousand episodes, the random choice rate falls to five per
 
 ### 3C. Train 50,000 episodes (3:00–3:50, approximate)
 
-(Cell 3C: `q = np.zeros`.) (Cell 3C: `range(episodes)`.) Training runs fifty thousand episodes from zeros.
+(Cell 3C: `q = np.zeros`.) (Cell 3C: `range(episodes)`.) Training starts with a zero Q-table and runs fifty thousand episodes.
 
 (Cell 3D: `print`; output: first observed update.) In the first episode, BOOK had an old value of zero and a target of negative one hundred twenty. With a learning rate of zero point one, **the updated value became negative twelve.**
 
-(Check terminal: all eighty cells passed, numerical evidence unchanged, saved path, and returned prompt.) (After success, reload from disk without saving the old viewer; only then speak.) The full run has finished. These reopened outputs are fresh.
+(Wait until Run All finishes: the kernel is idle, every code cell has completed, and no cell has an error. Check the final output, then return here; only then speak.) The full run has finished. These outputs are from this run.
 
 ## 4. Fair evaluation on 10,000 fresh trajectories (3:50–4:45, approximate)
 
 (Cell 4A: `test_paths`.) Now, let’s compare the four strategies.
 
-They share ten thousand new test paths.
+All four share ten thousand new test paths. The three rule-based baselines require no training.
 
 (Cell 4B: `immediate_policy`.) (Cell 4B: `price <= threshold`.) (Cell 4B: `best_action(Q, state)`.) They buy immediately, at one hundred twenty, at one hundred eighty or below, or follow Q-learning. Both price rules buy at the deadline if necessary.
 
-(Cell 4C: `policy(state)`.) (Cell 4C: `return state[1], trace`.) Each decision sees only current state and stops after purchase.
-
-(Cell 4C: `policy(state)`.) We test savings, uncertainty, optimality, and implementation correctness.
+(Cell 4C: `policy(state)`.) (Cell 4C: `return state[1], trace`.) Each strategy sees only the current state and stops after purchase.
 
 (Cell 4E: `display(Markdown(table))`; output: Mean purchase cost, four rows.) **Q-learning has the lowest test average**, about two hundred fourteen dollars and eighty five cents.
 
@@ -70,7 +68,7 @@ The agent waits until the deadline, then buys for three hundred sixty dollars.
 
 Known simulator probabilities let us calculate expected costs without sampling test paths. We compare buying with waiting backward from the deadline. The learner never receives these probabilities.
 
-(Cell 6D: `print`; output: optimum, learned cost, gap.) The learned policy costs about eight dollars and forty three cents above the optimum. These are calculated expectations, not test averages.
+(Cell 6D: `print`; output: optimum, learned cost, gap.) The learned policy’s expected cost is about eight dollars and forty three cents higher than the optimum. These are calculated expectations, not test averages.
 
 ## 7. BOOK/WAIT policy heatmap (5:55–6:15, approximate)
 
@@ -90,17 +88,13 @@ Compared with the threshold rule, average saving is about four dollars and eight
 
 (Cell 9C: `print`; output: all core checks passed.) Let’s check the verification evidence.
 
-Checks passed, but some bugs could remain.
+Checks passed, though they cannot rule out every bug.
 
 ## 10. Interpretation and limits (7:25–7:55, approximate)
 
 (Cell 10A: `print`; output: simulation limits.) Next, let’s review the model’s limits.
 
 **These results concern simulated prices, not real flights.** The model omits refunds, cancellations, and sold-out flights.
-
-## 11. Essential cells to personally run and explain before recording (7:55–8:00, approximate)
-
-(Scroll past this preparation checklist.) This section lists the demonstration cells.
 
 ## Appendix. Optional threshold demonstration (8:00–8:05, approximate)
 
@@ -120,7 +114,7 @@ Checks passed, but some bugs could remain.
 
 ### S3. Bounded five-seed/two-budget experiment (8:17–8:32, approximate)
 
-(Cell S3C: `display_supplementary_table`; output: five gap changes.) Each seed restarts at fifty thousand and two hundred thousand episodes. Across five seeds, more training worsened every final policy under the original settings.
+(Cell S3C: `display_supplementary_table`; output: five gap changes.) Each seed was trained separately for fifty thousand and two hundred thousand episodes. Across five seeds, more training worsened every final policy under the original settings.
 
 ### S4. Review learning rate and exploration (8:32–8:35, approximate)
 
@@ -148,7 +142,7 @@ Checks passed, but some bugs could remain.
 
 ### L4. Display all results and state-level associations (8:49–9:05, approximate)
 
-(Cell L4A: `display_supplementary_table`; output: positive paired reductions.) (Cell L4B: `display_supplementary_table`; output: mean and minimum costs.) The settings are zero point one, zero point zero three, and visit based decay. Changing learning rates improved all five final policies, but none reached the optimum.
+(Cell L4A: `display_supplementary_table`; output: positive paired reductions.) (Cell L4B: `display_supplementary_table`; output: mean and minimum costs.) The settings are zero point one, zero point zero three, and visit based decay. Both alternatives improved final costs for all five seeds, but none reached the optimum.
 
 ### Observed state-level examples from this execution (9:05–9:08, approximate)
 
@@ -156,7 +150,7 @@ Checks passed, but some bugs could remain.
 
 ### L5. Cautious exploratory interpretation (9:08–9:20, approximate)
 
-(Cell L5A: `print`; output: improves 5/5.) (Cell L5A: `print`; output: remaining gap unresolved.) The rate effect is demonstrated here; the remaining gap is not fully explained. These runs do not prove convergence.
+(Cell L5A: `print`; output: improves 5/5.) (Cell L5A: `print`; output: remaining gap unresolved.) The remaining gap is not fully explained. These runs do not prove convergence.
 
 ## Closing (9:20–10:00, approximate)
 
