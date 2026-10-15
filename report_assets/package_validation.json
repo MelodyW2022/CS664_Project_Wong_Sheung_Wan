@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "archive_sha256": "48387035ba118fbd42731914b78dbd387e7c88fa47d63936e78ad2a4c3ba3915",
-  "files": 53,
+  "archive_sha256": "bba6c4b42fa13dc87a3c033f1e7c929ebbae1bdf6a17823b8cff2c1f5f57ce38",
+  "files": 54,
   "manifest": [
     "CS664_Flight_Booking.ipynb",
     "run_notebook.py",
@@ -9,6 +9,7 @@
     "requirements.txt",
     "README.md",
     "RESULTS.md",
+    "CS664_Project_Wong_Sheung_Wan.md",
     "results/exact_mdp_comparison.csv",
     "results/exact_state_values.csv",
     "results/learned_policy_actions.csv",
@@ -61,6 +62,7 @@
   "crc_check": true,
   "temporary_extraction": true,
   "byte_identical_copies": true,
+  "report_markdown_included": true,
   "report_pdf_and_docx_excluded_for_separate_submission": true,
   "saved_80_cell_outputs_present": true,
   "all_markdown_runtime_result_links_present": true,

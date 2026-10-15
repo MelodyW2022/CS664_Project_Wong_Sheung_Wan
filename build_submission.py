@@ -493,7 +493,7 @@ def make_documents(blocks):
             markdown.append('| '+' | '.join(headers)+' |\n| '+' | '.join(['---']*len(headers))+' |\n'+
                 '\n'.join('| '+' | '.join(str(v) for v in row)+' |' for row in values))
         elif kind=='figure':markdown.append(f"![{data[1]}]({Path(data[0]).relative_to(ROOT)})")
-    (ROOT/'REPORT_DRAFT.md').write_text('\n\n'.join(markdown)+'\n')
+    (ROOT/f'{NAME}.md').write_text('\n\n'.join(markdown)+'\n')
 
 
 def audit_exported_hyperlinks(pdf, doc):
@@ -597,7 +597,7 @@ def verify_pdf_and_docx():
             assert normalize(value) in normalize(text), ('PDF', value)
             assert normalize(value) in normalize(doc_text), ('DOCX', value)
     hyperlink_checks = audit_exported_hyperlinks(pdf, doc)
-    markdown = (ROOT/'REPORT_DRAFT.md').read_text()
+    markdown = (ROOT/f'{NAME}.md').read_text()
     # Validate every displayed project path against the existing submitted archive.
     evidence_paths = sorted(set(re.findall(
         r'(?<![\w/])[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:csv|json|ipynb|md|png|npy|npz)\b', markdown)))
@@ -621,7 +621,7 @@ def verify_pdf_and_docx():
 def make_archive():
     """Package runtime and complete saved experiment evidence, without training."""
     filenames = ['CS664_Flight_Booking.ipynb', 'run_notebook.py', 'project_verification.py',
-                 'requirements.txt', 'README.md', 'RESULTS.md']
+                 'requirements.txt', 'README.md', 'RESULTS.md', f'{NAME}.md']
     files = [ROOT/name for name in filenames] + sorted(p for p in RESULTS.rglob('*') if p.is_file())
     archive = ROOT/f'{NAME}.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as z:
@@ -631,12 +631,13 @@ def make_archive():
         with zipfile.ZipFile(archive) as z:
             assert z.testzip() is None
             assert not any(n.endswith(('.pdf', '.docx')) for n in z.namelist())
+            assert z.read(f'{NAME}/{NAME}.md') == (ROOT/f'{NAME}.md').read_bytes()
             assert set(z.namelist()) == {str(Path(NAME)/p.relative_to(ROOT)) for p in files}
             z.extractall(temp)
         extracted = Path(temp)/NAME
         for source in files:
             assert fingerprint(extracted/source.relative_to(ROOT)) == fingerprint(source)
-        for filename in ['README.md', 'RESULTS.md']:
+        for filename in ['README.md', 'RESULTS.md', f'{NAME}.md']:
             for link in re.findall(r'\]\(([^)]+)\)', (extracted/filename).read_text()):
                 if '://' not in link:
                     assert (extracted/link).exists(), (filename, link)
@@ -702,7 +703,7 @@ print('PASS: all discovered imports and installed pinned requirement versions')
         result = {'status': 'PASS', 'archive_sha256': fingerprint(archive), 'files': len(files),
                   'manifest': [str(p.relative_to(ROOT)) for p in files],
                   'top_level_folder': NAME, 'crc_check': True, 'temporary_extraction': True,
-                  'byte_identical_copies': True, 'report_pdf_and_docx_excluded_for_separate_submission': True, 'saved_80_cell_outputs_present': True,
+                  'byte_identical_copies': True, 'report_markdown_included': True, 'report_pdf_and_docx_excluded_for_separate_submission': True, 'saved_80_cell_outputs_present': True,
                   'all_markdown_runtime_result_links_present': True, 'notebook_and_modules_compile': True,
                   'discovered_imports': sorted(imports), 'imports_succeeded_in_extracted_folder': True,
                   'installed_versions_match_pinned_requirements': True,

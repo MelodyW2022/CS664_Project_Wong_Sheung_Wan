@@ -48,6 +48,7 @@ Jupyter configuration and caches are created locally during execution.
 - `requirements.txt`: pinned Python environment packages.
 - `README.md`: setup, execution, and package instructions.
 - [RESULTS.md](RESULTS.md): generated findings and complete evidence index.
+- [CS664_Project_Wong_Sheung_Wan.md](CS664_Project_Wong_Sheung_Wan.md): editable Markdown report; its PDF is submitted separately.
 - `results/`: all saved tables, figures, configurations, checks, trajectories,
   Q-values, visit counts, and supplementary models.
 
@@ -62,9 +63,10 @@ and [learning_dynamics_final_comparison.csv](results/learning_dynamics_final_com
 The simulator probabilities are hypothetical. Sampled means and paired intervals
 are distinct from exact model expectations; none establishes real-flight savings.
 
-The report PDF and editable DOCX are separate files outside this ZIP. Upload the
-report separately from the project ZIP. The ZIP excludes the report files,
-proposal Markdown, instructor materials, practice materials, presentation scripts,
+The Markdown report is included in the ZIP; upload the matching PDF separately.
+A DOCX is not needed for submission. The proposal Markdown is optional and is not
+needed by the current execution or evidence references, so it is excluded.
+The ZIP also excludes instructor materials, practice materials, presentation scripts,
 development audits, environments, caches, and credentials. Those working-project
 files have not been deleted. Package verification checks saved outputs, imports,
 dependencies, and file paths; it does not constitute a new full Notebook execution.

@@ -1,7 +1,6 @@
 # Actual results — Flight Booking Decision Assistant
 
 This report is generated from the executed [main Notebook](CS664_Flight_Booking.ipynb).
-The instructor PDF supplies the official rubric; the unchanged proposal is the implementation plan.
 
 ## Simulation and training
 Seven opportunities (time 6 to 0); fares $120/$180/$240/$300/$360; uniform initial fare.
